@@ -680,17 +680,328 @@ body {
   color: var(--text-secondary);
 }
 
-/* Resume Preview */
+/* Resume Preview - Professional Blue Accent Theme */
 .resume-preview {
   background: white;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 0;
+  padding: 40px 32px;
   margin-bottom: 16px;
-  max-height: 300px;
+  max-height: 500px;
   overflow-y: auto;
-  font-size: 12px;
+  font-family: 'Calibri', 'Arial', 'Times New Roman', serif;
+  font-size: 11pt;
+  line-height: 1.15;
+  color: #000000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  scrollbar-width: thin;
+  scrollbar-color: #6b7280 #f3f4f6;
+}
+
+/* Professional Header with Blue Accents */
+.resume-preview .resume-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.resume-preview .resume-name {
+  font-size: 24pt;
+  font-weight: bold;
+  color: #000000;
+  margin: 0 0 8px 0;
+  letter-spacing: 1px;
+}
+
+.resume-preview .job-title-blue {
+  font-size: 14pt;
+  color: #4285f4;
+  font-weight: 500;
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+.resume-preview .contact-line {
+  font-size: 10pt;
+  color: #333333;
+  margin-bottom: 16px;
+  line-height: 1.3;
+}
+
+.resume-preview .blue-accent-line {
+  width: 100%;
+  height: 3px;
+  background: #4285f4;
+  margin: 16px 0 20px 0;
+}
+
+.resume-preview .summary-sidebar {
+  background: rgba(66, 133, 244, 0.1);
+  border-left: 4px solid #4285f4;
+  padding: 16px;
+  margin: 20px 0;
+  font-style: italic;
   line-height: 1.4;
+}
+
+/* Webkit scrollbar styles for better visibility */
+.resume-preview::-webkit-scrollbar {
+  width: 8px;
+}
+
+.resume-preview::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: 4px;
+}
+
+.resume-preview::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
+}
+
+.resume-preview::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-hover);
+}
+
+/* Override default h1 for header styling */
+.resume-preview h1:not(.resume-name) {
+  font-size: 16pt;
+  font-weight: bold;
+  margin-bottom: 8px;
+  margin-top: 0;
+  color: #000000;
+  text-align: center;
+  font-family: 'Calibri', 'Arial', 'Times New Roman', serif;
+}
+
+/* Legacy contact-info support */
+.resume-preview .contact-info {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 10pt;
+  color: #333333;
+  line-height: 1.3;
+}
+
+.resume-preview .contact-info p {
+  margin: 3px 0;
+  color: #333333;
+}
+
+/* Summary styling */
+.resume-preview .summary, .resume-preview .objective {
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+
+/* Professional Section Headers */
+.resume-preview h2 {
+  font-size: 14pt;
+  font-weight: bold;
+  margin-top: 24px;
+  margin-bottom: 12px;
+  color: #000000;
+  font-family: 'Calibri', 'Arial', 'Times New Roman', serif;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 4px;
+  letter-spacing: 0.5px;
+}
+
+/* Job titles and positions */
+.resume-preview h3 {
+  font-size: 11pt;
+  font-weight: bold;
+  margin-top: 12px;
+  margin-bottom: 3px;
+  color: #000000;
+  font-family: 'Calibri', 'Arial', 'Times New Roman', serif;
+}
+
+/* Company and date information - ATS-friendly format */
+.resume-preview .company-line {
+  font-size: 10pt;
+  color: #000000;
+  margin-bottom: 6px;
+  font-style: italic;
+}
+
+.resume-preview .job-dates {
+  font-size: 10pt;
+  color: #000000;
+  margin-bottom: 8px;
+  font-weight: normal;
+}
+
+/* ATS-Optimized Lists */
+.resume-preview ul {
+  margin: 6px 0;
+  padding-left: 20px;
+  list-style-type: disc; /* Standard bullets for ATS */
+}
+
+.resume-preview li {
+  margin-bottom: 3px;
+  line-height: 1.15;
+  color: #000000;
+  font-family: 'Calibri', 'Arial', 'Times New Roman', serif;
+  font-size: 10pt;
+}
+
+.resume-preview p {
+  margin: 6px 0;
+  color: #000000;
+  font-family: 'Calibri', 'Arial', 'Times New Roman', serif;
+  line-height: 1.15;
+  font-size: 10pt;
+}
+
+/* Skills section - comma separated for ATS */
+.resume-preview .skills-list {
+  margin: 8px 0;
+  color: #000000;
+  line-height: 1.3;
+}
+
+/* Professional summary */
+.resume-preview .summary {
+  margin: 12px 0 20px 0;
+  color: #000000;
+  line-height: 1.2;
+  font-size: 10pt;
+  text-align: justify;
+}
+
+/* Education formatting */
+.resume-preview .education-item {
+  margin-bottom: 8px;
+}
+
+/* Languages formatting */
+.resume-preview .languages {
+  color: #000000;
+  font-size: 10pt;
+}
+
+/* Contact information styling */
+.resume-preview p:first-of-type {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+/* Date ranges and company info styling */
+.resume-preview p em,
+.resume-preview em {
+  font-style: italic;
+  color: #333333; /* Slightly lighter for dates but still ATS-safe */
+}
+
+/* Strong/bold text for job titles, section headers */
+.resume-preview strong,
+.resume-preview b {
+  font-weight: bold;
+  color: #000000;
+}
+
+/* ATS-friendly spacing and layout improvements */
+.resume-preview div {
+  margin-bottom: 16px;
+}
+
+.resume-preview div:last-child {
+  margin-bottom: 0;
+}
+
+/* Skills list formatting */
+.resume-preview ul li {
+  padding-left: 0;
+}
+
+/* Company and date information */
+.resume-preview h3 + p {
+  margin-top: 0;
+  font-style: italic;
+  font-size: 10pt;
+  color: #333333;
+}
+
+/* Professional Blue Theme Print Styles */
+@media print {
+  .resume-preview {
+    font-size: 11pt;
+    line-height: 1.15;
+    padding: 0.5in;
+    border: none;
+    box-shadow: none;
+    margin: 0;
+    background: white;
+    color: black;
+    font-family: 'Calibri', 'Arial', 'Times New Roman', serif;
+    max-width: 8.5in;
+  }
+  
+  .resume-preview .resume-name {
+    font-size: 20pt;
+    font-weight: bold;
+    margin-bottom: 6pt;
+    text-align: center;
+    color: black;
+  }
+  
+  .resume-preview .job-title-blue {
+    font-size: 12pt;
+    color: #4285f4;
+    font-weight: 500;
+    text-align: center;
+    margin-bottom: 8pt;
+  }
+  
+  .resume-preview .contact-line {
+    font-size: 9pt;
+    text-align: center;
+    margin-bottom: 10pt;
+    color: #333333;
+  }
+  
+  .resume-preview .blue-accent-line {
+    width: 100%;
+    height: 2pt;
+    background: #4285f4;
+    margin: 10pt 0;
+  }
+  
+  .resume-preview .summary-sidebar {
+    background: rgba(66, 133, 244, 0.1);
+    border-left: 3pt solid #4285f4;
+    padding: 12pt;
+    margin: 12pt 0;
+    line-height: 1.3;
+  }
+  
+  .resume-preview h2 {
+    font-size: 12pt;
+    font-weight: bold;
+    margin-top: 12pt;
+    margin-bottom: 6pt;
+    color: black;
+    border-bottom: 1pt solid #f0f0f0;
+  }
+  
+  .resume-preview h3 {
+    font-size: 11pt;
+    font-weight: bold;
+    margin-top: 8pt;
+    margin-bottom: 2pt;
+    color: black;
+  }
+  
+  .resume-preview ul {
+    margin: 4pt 0;
+    padding-left: 18pt;
+  }
+  
+  .resume-preview li {
+    margin-bottom: 2pt;
+    line-height: 1.15;
+  }
 }
 
 .download-options {

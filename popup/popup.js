@@ -838,10 +838,12 @@ class ResumeCustomizer {
                 method: 'POST',
                 body: JSON.stringify({
                     jobData: jobData,
-                    profileData: {
+                    resumeData: {
                         ...profileData,
                         workExperience: this.workExperiences,
-                        certificates: this.certificates
+                        certificates: this.certificates,
+                        languages: profileData.languages ? profileData.languages.split(',').map(lang => lang.trim()) : [],
+                        skills: profileData.skills ? profileData.skills.split(',').map(skill => skill.trim()) : []
                     }
                 }),
                 signal: controller.signal
@@ -889,7 +891,15 @@ class ResumeCustomizer {
             } else {
                 this.showNotification('Resume customized successfully!', 'success');
             }
-            return result.data;
+            
+            // Return the proper result structure for displayCustomizationResults
+            return {
+                atsScore: result.atsScore,
+                keywordsMatched: result.keywordsMatched,
+                keywordsMissing: result.keywordsMissing,
+                customizedContent: result.customizedContent,
+                customizationId: result.customizationId
+            };
 
         } catch (error) {
             console.error('AI customization error:', error);
@@ -933,20 +943,27 @@ class ResumeCustomizer {
         const missingCount = document.getElementById('missingCount');
         
         scoreValue.textContent = `${results.atsScore}%`;
-        keywordCount.textContent = results.keywordsMatched;
-        missingCount.textContent = results.keywordsMissing;
+        keywordCount.textContent = Array.isArray(results.keywordsMatched) ? results.keywordsMatched.length : results.keywordsMatched;
+        missingCount.textContent = Array.isArray(results.keywordsMissing) ? results.keywordsMissing.length : results.keywordsMissing;
         
         // Update score circle color
         const degree = (results.atsScore / 100) * 360;
         scoreCircle.style.background = `conic-gradient(var(--primary-color) ${degree}deg, var(--border) ${degree}deg)`;
         
         // Update resume preview
-        document.getElementById('resumePreview').innerHTML = results.customizedContent;
+        const resumePreview = document.getElementById('resumePreview');
+        resumePreview.innerHTML = results.customizedContent;
+        
+        // Add scroll indicator if content overflows
+        setTimeout(() => {
+            if (resumePreview.scrollHeight > resumePreview.clientHeight) {
+                resumePreview.style.borderBottom = '3px solid var(--primary-color)';
+                resumePreview.title = 'Scroll down to see more content';
+            }
+        }, 100);
         
         // Save to customization history
         this.saveToHistory(results);
-        
-        this.showNotification('Resume customized successfully!', 'success');
     }
 
     // Download functionality
@@ -989,28 +1006,80 @@ class ResumeCustomizer {
                 const url = URL.createObjectURL(pdfBlob);
                 
                 // Download the actual PDF file
-                chrome.downloads.download({
-                    url: url,
-                    filename: filename + '.pdf'
-                });
-                
-                this.showNotification('PDF downloaded successfully!', 'success');
+                try {
+                    if (chrome && chrome.downloads && chrome.downloads.download) {
+                        chrome.downloads.download({
+                            url: url,
+                            filename: filename + '.pdf',
+                            conflictAction: 'uniquify'
+                        }, (downloadId) => {
+                            if (chrome.runtime.lastError) {
+                                console.error('Chrome download error:', chrome.runtime.lastError);
+                                this.triggerDirectDownload(url, filename + '.pdf');
+                                this.showNotification('PDF downloaded successfully!', 'success');
+                            } else {
+                                this.showNotification('PDF downloaded successfully!', 'success');
+                            }
+                        });
+                    } else {
+                        this.triggerDirectDownload(url, filename + '.pdf');
+                        this.showNotification('PDF downloaded successfully!', 'success');
+                    }
+                } catch (downloadError) {
+                    console.error('Download error:', downloadError);
+                    this.triggerDirectDownload(url, filename + '.pdf');
+                    this.showNotification('PDF downloaded successfully!', 'success');
+                }
                 
                 // Clean up
                 setTimeout(() => URL.revokeObjectURL(url), 1000);
                 
             } else {
-                // For DOC format, create a simple text file for now
-                const textContent = resumePreview.textContent || resumePreview.innerText || '';
-                const blob = new Blob([textContent], { type: 'text/plain' });
-                const url = URL.createObjectURL(blob);
-                
-                chrome.downloads.download({
-                    url: url,
-                    filename: filename + '.txt'
+                // For DOC format, call backend to generate actual Word document
+                const response = await this.makeAuthenticatedRequest('http://localhost:4003/api/download/doc', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        htmlContent: htmlContent,
+                        filename: filename
+                    })
                 });
+
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+
+                // Get the DOC as a blob
+                const docBlob = await response.blob();
                 
-                this.showNotification('Text file downloaded! You can copy content to Word document.', 'success');
+                // Create download URL
+                const url = URL.createObjectURL(docBlob);
+                
+                try {
+                    if (chrome && chrome.downloads && chrome.downloads.download) {
+                        chrome.downloads.download({
+                            url: url,
+                            filename: filename + '.doc',
+                            conflictAction: 'uniquify'
+                        }, (downloadId) => {
+                            if (chrome.runtime.lastError) {
+                                console.error('Chrome download error:', chrome.runtime.lastError);
+                                this.triggerDirectDownload(url, filename + '.doc');
+                                this.showNotification('DOC document downloaded successfully!', 'success');
+                            } else {
+                                this.showNotification('DOC document downloaded successfully!', 'success');
+                            }
+                        });
+                    } else {
+                        this.triggerDirectDownload(url, filename + '.doc');
+                        this.showNotification('DOC document downloaded successfully!', 'success');
+                    }
+                } catch (downloadError) {
+                    console.error('Download error:', downloadError);
+                    this.triggerDirectDownload(url, filename + '.doc');
+                    this.showNotification('DOC document downloaded successfully!', 'success');
+                }
+                
+                // Clean up
                 setTimeout(() => URL.revokeObjectURL(url), 1000);
             }
             
@@ -1471,9 +1540,6 @@ class ResumeCustomizer {
                     <span class="stat-number">${uniqueCompanies}</span>
                     <span class="stat-label">Companies</span>
                 </div>
-                <div class="stat-item">
-                    <button onclick="window.resumeCustomizer.addTestHistoryItem()" style="padding: 4px 8px; background: var(--primary); color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer;">Add Test Item</button>
-                </div>
             </div>
         `;
 
@@ -1517,13 +1583,13 @@ class ResumeCustomizer {
                     <div class="history-actions">
                         <div class="download-icons">
                             ${(workingUrl && workingUrl !== 'chrome-extension://' && !workingUrl.startsWith('chrome-extension://') && (workingUrl.startsWith('http://') || workingUrl.startsWith('https://'))) ? 
-                                `<button class="icon-btn link-btn" onclick="window.open('${workingUrl}', '_blank')" title="View Job Posting">🔗</button>` : 
+                                `<button class="icon-btn link-btn" data-url="${workingUrl}" title="View Job Posting">🔗</button>` : 
                                 `<span class="icon-btn link-btn disabled" title="No job posting URL available">🔗</span>`
                             }
-                            <button class="icon-btn pdf-btn" onclick="window.resumeCustomizer.downloadHistoryResume('${item.id}', 'pdf')" title="Download PDF">
+                            <button class="icon-btn pdf-btn" data-item-id="${item.id}" data-format="pdf" title="Download PDF">
                                 📄
                             </button>
-                            <button class="icon-btn doc-btn" onclick="window.resumeCustomizer.downloadHistoryResume('${item.id}', 'doc')" title="Download DOC">
+                            <button class="icon-btn doc-btn" data-item-id="${item.id}" data-format="doc" title="Download DOC">
                                 📝
                             </button>
                         </div>
@@ -1533,6 +1599,49 @@ class ResumeCustomizer {
         });
 
         container.innerHTML = html;
+        
+        // Add event listeners to all the buttons after rendering
+        this.setupHistoryButtonListeners(container);
+    }
+
+    setupHistoryButtonListeners(container) {
+        // Add event listeners for link buttons
+        const linkButtons = container.querySelectorAll('.link-btn[data-url]');
+        linkButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const url = btn.getAttribute('data-url');
+                if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+                    // Use chrome.tabs.create instead of window.open for better compatibility
+                    chrome.tabs.create({ url: url });
+                    this.showNotification('Opening job posting...', 'info');
+                } else {
+                    this.showNotification('Invalid job posting URL', 'error');
+                }
+            });
+        });
+        
+        // Add event listeners for PDF download buttons
+        const pdfButtons = container.querySelectorAll('.pdf-btn[data-item-id]');
+        pdfButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const itemId = btn.getAttribute('data-item-id');
+                const format = btn.getAttribute('data-format');
+                this.downloadHistoryResume(itemId, format);
+            });
+        });
+        
+        // Add event listeners for DOC download buttons
+        const docButtons = container.querySelectorAll('.doc-btn[data-item-id]');
+        docButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const itemId = btn.getAttribute('data-item-id');
+                const format = btn.getAttribute('data-format');
+                this.downloadHistoryResume(itemId, format);
+            });
+        });
     }
 
     async viewHistoryItem(itemId) {
@@ -1643,8 +1752,10 @@ class ResumeCustomizer {
             console.log('Total history items from backend:', history.length);
             console.log('History item IDs:', history.map(h => ({ id: h.id, title: h.jobTitle })));
             
-            const item = history.find(h => h.id === itemId);
-            console.log('Looking for item with ID:', itemId);
+            // Convert both IDs to strings for comparison to handle type mismatches
+            const item = history.find(h => String(h.id) === String(itemId));
+            console.log('Looking for item with ID:', itemId, 'Type:', typeof itemId);
+            console.log('Available IDs:', history.map(h => ({ id: h.id, type: typeof h.id })));
             console.log('Found item:', item ? item.jobTitle : 'NOT FOUND');
             
             if (!item) {
@@ -1691,38 +1802,89 @@ class ResumeCustomizer {
                 // Download the PDF file
                 console.log('Downloading PDF with filename:', filename + '.pdf');
                 try {
-                    chrome.downloads.download({
-                        url: url,
-                        filename: filename + '.pdf'
-                    });
-                    this.showNotification('PDF download started!', 'success');
+                    // Use Chrome downloads API if available, fallback to direct download
+                    if (chrome && chrome.downloads && chrome.downloads.download) {
+                        chrome.downloads.download({
+                            url: url,
+                            filename: filename + '.pdf',
+                            conflictAction: 'uniquify'
+                        }, (downloadId) => {
+                            if (chrome.runtime.lastError) {
+                                console.error('Chrome download error:', chrome.runtime.lastError);
+                                this.showNotification('Download failed: ' + chrome.runtime.lastError.message, 'error');
+                                // Fallback to direct download
+                                this.triggerDirectDownload(url, filename + '.pdf');
+                            } else {
+                                console.log('Download started with ID:', downloadId);
+                                this.showNotification('PDF download started!', 'success');
+                            }
+                        });
+                    } else {
+                        // Fallback to direct download
+                        this.triggerDirectDownload(url, filename + '.pdf');
+                        this.showNotification('PDF download started!', 'success');
+                    }
                 } catch (downloadError) {
                     console.error('Chrome download API error:', downloadError);
-                    this.showNotification('Download failed: ' + downloadError.message, 'error');
+                    this.triggerDirectDownload(url, filename + '.pdf');
+                    this.showNotification('PDF download started!', 'success');
                 }
                 
                 // Clean up
                 setTimeout(() => URL.revokeObjectURL(url), 1000);
                 
             } else {
-                // For DOC format, create a simple text file
-                console.log('Creating DOC/text file...');
-                const textContent = item.resumeContent.replace(/<[^>]*>/g, '\n').replace(/\n+/g, '\n').trim();
-                const blob = new Blob([textContent], { type: 'text/plain' });
-                const url = URL.createObjectURL(blob);
+                // For DOC format, call backend to generate actual Word document
+                console.log('Making authenticated request for DOC...');
+                const response = await this.makeAuthenticatedRequest('http://localhost:4003/api/download/doc', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        htmlContent: htmlContent,
+                        filename: filename
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+
+                // Get the DOC as a blob
+                const docBlob = await response.blob();
                 
-                console.log('Downloading text file with filename:', filename + '.txt');
+                // Create download URL
+                const url = URL.createObjectURL(docBlob);
+                
+                console.log('Downloading DOC file with filename:', filename + '.doc');
                 try {
-                    chrome.downloads.download({
-                        url: url,
-                        filename: filename + '.txt'
-                    });
-                    this.showNotification('Text file download started!', 'success');
+                    // Use Chrome downloads API if available, fallback to direct download
+                    if (chrome && chrome.downloads && chrome.downloads.download) {
+                        chrome.downloads.download({
+                            url: url,
+                            filename: filename + '.doc',
+                            conflictAction: 'uniquify'
+                        }, (downloadId) => {
+                            if (chrome.runtime.lastError) {
+                                console.error('Chrome download error:', chrome.runtime.lastError);
+                                this.showNotification('Download failed: ' + chrome.runtime.lastError.message, 'error');
+                                // Fallback to direct download
+                                this.triggerDirectDownload(url, filename + '.doc');
+                            } else {
+                                console.log('Download started with ID:', downloadId);
+                                this.showNotification('DOC download started!', 'success');
+                            }
+                        });
+                    } else {
+                        // Fallback to direct download
+                        this.triggerDirectDownload(url, filename + '.doc');
+                        this.showNotification('DOC download started!', 'success');
+                    }
                 } catch (downloadError) {
                     console.error('Chrome download API error:', downloadError);
-                    this.showNotification('Download failed: ' + downloadError.message, 'error');
+                    this.triggerDirectDownload(url, filename + '.doc');
+                    this.showNotification('DOC download started!', 'success');
                 }
                 
+                // Clean up
                 setTimeout(() => URL.revokeObjectURL(url), 1000);
             }
             
@@ -2486,6 +2648,22 @@ class ResumeCustomizer {
             passwordInput.type = 'password';
             eyeIcon.textContent = '👁️'; // Open eye
             toggleBtn.title = 'Show password';
+        }
+    }
+
+    // Fallback download method for when Chrome downloads API fails
+    triggerDirectDownload(url, filename) {
+        try {
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            console.log('Direct download triggered for:', filename);
+        } catch (error) {
+            console.error('Direct download failed:', error);
         }
     }
 }

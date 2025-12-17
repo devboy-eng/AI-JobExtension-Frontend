@@ -5,6 +5,7 @@
 # Backend directory (will be separate repo)
 backend/
 start-backend.js
+kuposu_ai_rails_backend/
 
 # Development and test files
 add-*.js

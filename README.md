@@ -1,29 +1,31 @@
-# AI Resume Customizer Chrome Extension
+# KUPOSU AI Resume Maker - Chrome Extension
 
 A powerful Chrome extension that uses AI to automatically customize your resume to match LinkedIn job postings, improving your ATS (Applicant Tracking System) score and chances of getting hired.
 
-![AI Resume Customizer](https://via.placeholder.com/800x400/2563eb/ffffff?text=AI+Resume+Customizer)
+![KUPOSU AI Resume Maker](https://via.placeholder.com/800x400/4285f4/ffffff?text=KUPOSU+AI+Resume+Maker)
 
 ## 🌟 Features
 
 ### ✨ Core Functionality
-- **🤖 AI-Powered Customization**: Uses OpenAI/Gemini to tailor your resume to specific job postings
-- **📊 ATS Score Calculation**: Real-time keyword matching and score optimization (target 85%+)
+- **🤖 AI-Powered Customization**: Uses OpenAI GPT-4o-mini to intelligently tailor your resume to specific job postings
+- **📊 ATS Score Calculation**: Real-time keyword matching and score optimization (target 80%+)
 - **🔍 LinkedIn Integration**: Automatically detects and extracts job data from LinkedIn job pages
-- **📄 Multiple Export Formats**: Download customized resumes as PDF or DOC files
-- **📚 Version Management**: Save and manage multiple resume versions for different roles
+- **📄 Multiple Export Formats**: Download customized resumes as styled PDF or Word DOC files
+- **📚 Customization History**: Complete history of all AI-generated resumes with download options
+- **💰 Coin-Based System**: Fair usage system with Razorpay payment integration
 
 ### 🎯 Smart Features
-- **📝 Resume Parsing**: Upload existing resume (PDF/DOC) and auto-extract data
-- **🎨 Professional Templates**: Modern, ATS-friendly templates that match your reference CV
+- **📝 Resume Parsing**: Upload existing resume (PDF/DOC/TXT) and auto-extract data
+- **🎨 Professional Blue Theme**: Modern, ATS-friendly design with professional blue accents
 - **🏷️ Keyword Optimization**: Intelligent keyword matching and density optimization
-- **💡 Improvement Suggestions**: AI-generated recommendations for better job matching
+- **📋 Work Experience Management**: Drag-and-drop reordering and comprehensive editing
 - **🔄 Auto-save**: Automatic saving of profile data and work experience
+- **📊 Real-time ATS Scoring**: Live feedback on resume optimization
 
 ### 🛡️ Security & Privacy
-- **🔒 Local Storage**: Profile data stored locally in your browser
-- **🚫 No Data Collection**: Your information never leaves your device (except for AI processing)
-- **⚡ Fast Processing**: Optimized for speed and minimal resource usage
+- **🔒 Secure Backend**: JWT-based authentication with encrypted data storage
+- **🚫 Privacy First**: Your data is securely stored and never shared
+- **⚡ Fast Processing**: Optimized Rails backend for lightning-fast responses
 
 ## 🚀 Quick Start
 
@@ -31,18 +33,22 @@ A powerful Chrome extension that uses AI to automatically customize your resume 
 
 #### Development Setup
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/ai-resume-chrome-extension.git
-cd ai-resume-chrome-extension
+# Clone the frontend repository
+git clone https://github.com/devboy-eng/JobExtension_Frontend.git
+cd JobExtension_Frontend
 
-# Install dependencies
-npm install
+# Clone the backend repository
+git clone https://github.com/devboy-eng/JobExtension_Backend.git
 
-# Install backend dependencies
-npm run install-backend
+# Setup backend (Rails)
+cd JobExtension_Backend
+bundle install
+ruby run_migrations.rb
+ruby start_rails_server.rb
 
-# Start development servers
-npm run dev-all
+# Setup frontend (Chrome Extension)
+cd ../
+# Load extension in Chrome developer mode
 ```
 
 #### Load Extension in Chrome
@@ -51,24 +57,28 @@ npm run dev-all
 3. Click "Load unpacked" and select the project directory
 4. The extension icon will appear in your toolbar
 
-### 2. Backend Setup
+### 2. Backend Setup (Rails)
 
 1. Copy the environment template:
 ```bash
-cd backend
+cd JobExtension_Backend
 cp .env.example .env
 ```
 
-2. Configure your AI API keys in `.env`:
+2. Configure your API keys in `.env`:
 ```env
 OPENAI_API_KEY=sk-your-openai-key-here
-# OR
-GEMINI_API_KEY=your-gemini-key-here
+RAZORPAY_KEY_ID=your-razorpay-key-id
+RAZORPAY_KEY_SECRET=your-razorpay-key-secret
+DATABASE_USER=nagarjun
+DATABASE_PASSWORD=
+JWT_SECRET=your-secure-jwt-secret
 ```
 
-3. Start the backend server:
+3. Start the Rails server:
 ```bash
-npm run start-backend
+ruby start_rails_server.rb
+# Server runs on http://localhost:4003
 ```
 
 ### 3. Usage
@@ -82,41 +92,54 @@ npm run start-backend
 ## 📁 Project Structure
 
 ```
-ai-resume-chrome-extension/
-├── manifest.json              # Chrome extension manifest
+JobExtension_Frontend/         # Chrome Extension Frontend
+├── manifest.json              # Chrome extension manifest (v3)
 ├── popup/                     # Extension popup interface
-│   ├── popup.html            # Main UI
-│   ├── popup.css             # Styles
-│   └── popup.js              # Frontend logic
+│   ├── popup.html            # Main UI with tabbed interface
+│   ├── popup.css             # Professional blue theme styles
+│   └── popup.js              # Complete frontend logic
 ├── content/                   # LinkedIn page integration
 │   ├── content.js            # Job data extraction
 │   └── content.css           # Content script styles
 ├── background/                # Service worker
 │   └── background.js         # Background processes
-├── backend/                   # Node.js API server
-│   ├── server.js             # Express server
-│   ├── routes/               # API endpoints
-│   ├── services/             # Business logic
-│   ├── utils/                # Utilities
-│   └── templates/            # Resume templates
-├── icons/                     # Extension icons
-├── scripts/                   # Build scripts
-└── package.json              # Dependencies
+├── icons/                     # Extension icons (16, 32, 48, 128px)
+└── README.md                 # Frontend documentation
+
+JobExtension_Backend/          # Rails API Backend (Separate Repo)
+├── app/
+│   ├── controllers/          # API controllers
+│   │   ├── ai_controller.rb  # AI customization
+│   │   ├── auth_controller.rb # JWT authentication
+│   │   ├── downloads_controller.rb # PDF/DOC generation
+│   │   ├── payments_controller.rb # Razorpay integration
+│   │   └── ...              # Other controllers
+│   └── models/              # ActiveRecord models
+├── config/                   # Rails configuration
+├── db/migrate/              # Database migrations
+├── start_rails_server.rb    # Custom startup script
+└── README.md               # Backend documentation
 ```
 
 ## 🔧 Configuration
 
 ### AI Provider Setup
 
-#### OpenAI (Recommended)
+#### OpenAI GPT-4o-mini (Default)
 1. Get API key from [OpenAI Platform](https://platform.openai.com/)
 2. Add to `.env`: `OPENAI_API_KEY=sk-your-key`
-3. Set provider: `AI_PROVIDER=openai`
+3. The system uses GPT-4o-mini for optimal cost and performance balance
 
-#### Google Gemini
-1. Get API key from [Google AI Studio](https://makersuite.google.com/)
-2. Add to `.env`: `GEMINI_API_KEY=your-key`
-3. Set provider: `AI_PROVIDER=gemini`
+### Payment Setup
+
+#### Razorpay Integration
+1. Get keys from [Razorpay Dashboard](https://dashboard.razorpay.com/)
+2. Add to `.env`: 
+   ```env
+   RAZORPAY_KEY_ID=your-key-id
+   RAZORPAY_KEY_SECRET=your-key-secret
+   ```
+3. Configure webhook for automatic coin crediting
 
 ### Backend Deployment
 
@@ -188,19 +211,29 @@ npm test -- background
 
 ## 📋 API Endpoints
 
-### Resume Generation
-- `POST /api/resume/generate` - Generate PDF/DOC resume
-- `POST /api/resume/preview` - Generate HTML preview
-- `POST /api/resume/ats-score` - Calculate ATS score
+### Authentication
+- `POST /api/auth/signup` - User registration
+- `POST /api/auth/login` - User login
+- `GET /verify-email` - Email verification
 
-### Document Parsing
-- `POST /api/parse/resume` - Parse uploaded resume file
-- `POST /api/parse/job-text` - Parse job description text
+### AI & Resume Processing
+- `POST /api/ai/customize` - AI resume customization with ATS optimization
+- `POST /api/resume/ats-score` - Calculate ATS compatibility score
+- `POST /api/parse-resume` - Parse uploaded resume files (PDF/DOC/TXT)
 
-### AI Processing
-- `POST /api/ai/customize` - Customize resume with AI
-- `POST /api/ai/suggestions` - Get improvement suggestions
-- `POST /api/ai/optimize-keywords` - Optimize for ATS
+### Document Generation
+- `POST /api/download/pdf` - Generate styled PDF resume
+- `POST /api/download/doc` - Generate Word DOC resume (RTF format)
+
+### Profile & History
+- `GET /api/profile` - Get user profile
+- `POST /api/profile` - Update user profile
+- `GET /api/customization-history` - Get all customization history
+
+### Payment & Coins
+- `GET /api/coins/balance` - Get current coin balance
+- `POST /api/payment/create-order` - Create Razorpay payment order
+- `POST /api/payment/webhook` - Payment webhook handler
 
 ## 🎨 Templates
 
