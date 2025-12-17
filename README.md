@@ -1,6 +1,6 @@
 # KUPOSU AI Resume Maker - Chrome Extension
 
-A powerful Chrome extension that uses AI to automatically customize your resume to match LinkedIn job postings, improving your ATS (Applicant Tracking System) score and chances of getting hired.
+A powerful Chrome extension that uses AI to automatically customize your resume to match job postings from LinkedIn and Naukri.com, improving your ATS (Applicant Tracking System) score and chances of getting hired.
 
 ![KUPOSU AI Resume Maker](https://via.placeholder.com/800x400/4285f4/ffffff?text=KUPOSU+AI+Resume+Maker)
 
@@ -9,7 +9,7 @@ A powerful Chrome extension that uses AI to automatically customize your resume 
 ### ✨ Core Functionality
 - **🤖 AI-Powered Customization**: Uses OpenAI GPT-4o-mini to intelligently tailor your resume to specific job postings
 - **📊 ATS Score Calculation**: Real-time keyword matching and score optimization (target 80%+)
-- **🔍 LinkedIn Integration**: Automatically detects and extracts job data from LinkedIn job pages
+- **🔍 Multi-Platform Integration**: Automatically detects and extracts job data from LinkedIn and Naukri job pages
 - **📄 Multiple Export Formats**: Download customized resumes as styled PDF or Word DOC files
 - **📚 Customization History**: Complete history of all AI-generated resumes with download options
 - **💰 Coin-Based System**: Fair usage system with Razorpay payment integration
@@ -85,9 +85,28 @@ ruby start_rails_server.rb
 
 1. **Setup Profile**: Click the extension icon and fill in your profile information
 2. **Upload Resume**: (Optional) Upload your existing resume for auto-parsing
-3. **Browse Jobs**: Navigate to a LinkedIn job posting
+3. **Browse Jobs**: Navigate to a LinkedIn or Naukri job posting
 4. **Customize**: Click "Analyze Job & Customize Resume" in the extension popup
 5. **Download**: Review the customized resume and download as PDF/DOC
+
+## 🌐 Supported Job Platforms
+
+### LinkedIn Jobs
+- **URL Pattern**: `https://www.linkedin.com/jobs/*`
+- **Coverage**: Global job market
+- **Features**: Full integration with LinkedIn's job posting structure
+- **Data Extraction**: Title, Company, Location, Description, Requirements, Skills
+
+### Naukri.com Jobs  
+- **URL Pattern**: `https://www.naukri.com/job-listings-*`
+- **Coverage**: India's largest job portal
+- **Features**: Naukri-specific data extraction and UI integration
+- **Data Extraction**: Title, Company, Location, Salary, Description, Experience Level
+
+### Coming Soon
+- Indeed.com integration
+- Monster.com integration
+- AngelList/Wellfound integration
 
 ## 📁 Project Structure
 
@@ -98,8 +117,9 @@ JobExtension_Frontend/         # Chrome Extension Frontend
 │   ├── popup.html            # Main UI with tabbed interface
 │   ├── popup.css             # Professional blue theme styles
 │   └── popup.js              # Complete frontend logic
-├── content/                   # LinkedIn page integration
-│   ├── content.js            # Job data extraction
+├── content/                   # Job platform integration
+│   ├── content.js            # LinkedIn job data extraction
+│   ├── naukri-content.js     # Naukri job data extraction
 │   └── content.css           # Content script styles
 ├── background/                # Service worker
 │   └── background.js         # Background processes
@@ -270,10 +290,17 @@ The extension optimizes your resume for ATS systems by:
 - Check backend server is running on port 3000
 - Ensure network connectivity to AI service
 
-#### LinkedIn Detection Issues
+#### Job Platform Detection Issues
+
+**LinkedIn:**
 - Refresh the LinkedIn job page
 - Ensure you're on a job posting URL (contains `/jobs/`)
 - Check browser console for errors
+
+**Naukri:**
+- Refresh the Naukri job page
+- Ensure you're on a job listing URL (contains `/job-listings-`)
+- Wait for the page to fully load before clicking the extension
 
 #### Backend Connection Failed
 - Verify backend server is running: `npm run start-backend`
