@@ -14,7 +14,7 @@ class ResumeCustomizer {
         this.setupEventListeners();
         this.checkAuthStatus();
         // Don't load data here - will be loaded after authentication check
-        this.checkLinkedInStatus();
+        this.checkJobPlatformStatus();
     }
 
     detectEnvironment() {
@@ -700,32 +700,43 @@ class ResumeCustomizer {
         }
     }
 
-    // LinkedIn integration
-    async checkLinkedInStatus() {
+    // Job platform integration (LinkedIn & Naukri)
+    async checkJobPlatformStatus() {
         try {
             const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
             const currentTab = tabs[0];
             
-            if (currentTab.url && currentTab.url.includes('linkedin.com/jobs')) {
-                this.updateLinkedInStatus(true);
+            if (currentTab.url) {
+                const platform = this.detectJobPlatform(currentTab.url);
+                this.updateJobPlatformStatus(platform);
             } else {
-                this.updateLinkedInStatus(false);
+                this.updateJobPlatformStatus(null);
             }
         } catch (error) {
-            console.error('Error checking LinkedIn status:', error);
-            this.updateLinkedInStatus(false);
+            console.error('Error checking job platform status:', error);
+            this.updateJobPlatformStatus(null);
         }
     }
 
-    updateLinkedInStatus(isOnLinkedIn) {
+    detectJobPlatform(url) {
+        if (url.includes('linkedin.com/jobs')) {
+            return { name: 'LinkedIn', detected: true };
+        } else if (url.includes('naukri.com/job-listings-')) {
+            return { name: 'Naukri', detected: true };
+        } else {
+            return { name: null, detected: false };
+        }
+    }
+
+    updateJobPlatformStatus(platform) {
         const statusEl = document.getElementById('detectionStatus');
         const analyzeBtn = document.getElementById('analyzeJob');
         
-        if (isOnLinkedIn) {
+        if (platform && platform.detected) {
             statusEl.className = 'detection-status success';
             statusEl.innerHTML = `
                 <span class="status-icon">✅</span>
-                <span class="status-message">LinkedIn job posting detected</span>
+                <span class="status-message">${platform.name} job posting detected</span>
             `;
             analyzeBtn.disabled = false;
             
@@ -735,7 +746,7 @@ class ResumeCustomizer {
             statusEl.className = 'detection-status';
             statusEl.innerHTML = `
                 <span class="status-icon">⚠️</span>
-                <span class="status-message">Please navigate to a LinkedIn job posting</span>
+                <span class="status-message">Please navigate to a LinkedIn or Naukri job posting</span>
             `;
             analyzeBtn.disabled = true;
         }

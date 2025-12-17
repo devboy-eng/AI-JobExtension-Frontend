@@ -12,6 +12,7 @@
   ],
   "host_permissions": [
     "https://www.linkedin.com/*",
+    "https://www.naukri.com/*",
     "https://api.openai.com/*",
     "https://generativelanguage.googleapis.com/*",
     "http://localhost:4003/*"
@@ -31,6 +32,11 @@
       "matches": ["https://www.linkedin.com/jobs/*"],
       "js": ["content/content.js"],
       "css": ["content/content.css"]
+    },
+    {
+      "matches": ["https://www.naukri.com/job-listings-*"],
+      "js": ["content/naukri-content.js"],
+      "css": ["content/content.css"]
     }
   ],
   "background": {
@@ -39,7 +45,7 @@
   "web_accessible_resources": [
     {
       "resources": ["popup/*", "assets/*"],
-      "matches": ["https://www.linkedin.com/*"]
+      "matches": ["https://www.linkedin.com/*", "https://www.naukri.com/*"]
     }
   ],
   "icons": {
