@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal Resume Debug Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .btn {
+            background: #2563eb;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+            font-weight: 500;
+        }
+        .btn:hover { background: #1d4ed8; }
+        .status {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+        .status.success { background: #d1ecf1; color: #0c5460; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .status.info { background: #fff3cd; color: #856404; }
+        .debug-output {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .comparison-box {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            background: white;
+        }
+        .comparison-box h4 {
+            margin: 0 0 10px 0;
+            color: #1f2937;
+        }
+        .resume-output {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 6px;
+            background: white;
+            margin-top: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐛 Minimal Resume Debug</h1>
+        <p>Test what happens when user has minimal profile data (just like your scenario)</p>
+        
+        <div id="status"></div>
+        
+        <button class="btn" onclick="testMinimalProfileData()">🧪 Test Minimal Profile Data</button>
+        <button class="btn" onclick="testWithWorkExperience()">💼 Test With Work Experience</button>
+        <button class="btn" onclick="testWithCertificates()">🎓 Test With Certificates</button>
+        <button class="btn" onclick="testCompleteProfile()">✅ Test Complete Profile</button>
+        
+        <div class="comparison">
+            <div class="comparison-box">
+                <h4>📤 Input Profile Data</h4>
+                <div class="debug-output" id="inputData">Input data will appear here...</div>
+            </div>
+            
+            <div class="comparison-box">
+                <h4>📥 Backend Debug Logs</h4>
+                <div class="debug-output" id="debugLogs">Backend debug logs will appear here...</div>
+            </div>
+        </div>
+
+        <div class="resume-output">
+            <h4>📄 Generated Resume HTML</h4>
+            <div id="generatedResume">Generated resume will appear here...</div>
+        </div>
+    </div>
+
+    <script>
+        function log(elementId, message) {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            element.textContent += `[${timestamp}] ${message}\n`;
+            element.scrollTop = element.scrollHeight;
+        }
+
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        async function testMinimalProfileData() {
+            showStatus('🧪 Testing with minimal profile data (mimicking user scenario)...', 'info');
+            
+            // Clear previous results
+            document.getElementById('inputData').textContent = '';
+            document.getElementById('debugLogs').textContent = '';
+            document.getElementById('generatedResume').innerHTML = '';
+
+            // Minimal data similar to what user might have
+            const testData = {
+                jobData: {
+                    title: "Chief Technology Officer",
+                    company: "Tata Consultancy Services", 
+                    description: "Looking for a CTO with leadership experience in technology and innovation."
+                },
+                profileData: {
+                    name: "User Name",
+                    designation: "Head of IT",
+                    email: "",
+                    phone: "",
+                    skills: "Head of IT", // This seems to be the issue!
+                    workExperience: [], // EMPTY!
+                    certificates: [] // EMPTY!
+                }
+            };
+
+            log('inputData', 'MINIMAL TEST DATA:');
+            log('inputData', JSON.stringify(testData, null, 2));
+
+            await sendTestRequest(testData);
+        }
+
+        async function testWithWorkExperience() {
+            showStatus('💼 Testing with work experience...', 'info');
+            
+            document.getElementById('inputData').textContent = '';
+            document.getElementById('debugLogs').textContent = '';
+            document.getElementById('generatedResume').innerHTML = '';
+
+            const testData = {
+                jobData: {
+                    title: "Chief Technology Officer",
+                    company: "Tata Consultancy Services", 
+                    description: "Looking for a CTO with leadership experience in technology and innovation."
+                },
+                profileData: {
+                    name: "Test User",
+                    designation: "Head of IT",
+                    email: "test@example.com",
+                    skills: "Leadership, Technology Management, IT Strategy",
+                    workExperience: [
+                        {
+                            designation: "Head of IT",
+                            company: "TechCorp",
+                            startDate: "2020-01",
+                            endDate: "",
+                            current: true,
+                            description: "Leading IT strategy and team management"
+                        }
+                    ],
+                    certificates: []
+                }
+            };
+
+            log('inputData', 'WITH WORK EXPERIENCE:');
+            log('inputData', JSON.stringify(testData, null, 2));
+
+            await sendTestRequest(testData);
+        }
+
+        async function testWithCertificates() {
+            showStatus('🎓 Testing with certificates...', 'info');
+            
+            document.getElementById('inputData').textContent = '';
+            document.getElementById('debugLogs').textContent = '';
+            document.getElementById('generatedResume').innerHTML = '';
+
+            const testData = {
+                jobData: {
+                    title: "Chief Technology Officer",
+                    company: "Tata Consultancy Services", 
+                    description: "Looking for a CTO with leadership experience in technology and innovation."
+                },
+                profileData: {
+                    name: "Test User",
+                    designation: "Head of IT",
+                    email: "test@example.com",
+                    skills: "Leadership, Technology Management",
+                    workExperience: [],
+                    certificates: [
+                        {
+                            name: "AWS Solutions Architect",
+                            issuer: "Amazon Web Services",
+                            issueDate: "2023-01",
+                            expiryDate: "2026-01"
+                        }
+                    ]
+                }
+            };
+
+            log('inputData', 'WITH CERTIFICATES:');
+            log('inputData', JSON.stringify(testData, null, 2));
+
+            await sendTestRequest(testData);
+        }
+
+        async function testCompleteProfile() {
+            showStatus('✅ Testing with complete profile...', 'info');
+            
+            document.getElementById('inputData').textContent = '';
+            document.getElementById('debugLogs').textContent = '';
+            document.getElementById('generatedResume').innerHTML = '';
+
+            const testData = {
+                jobData: {
+                    title: "Chief Technology Officer",
+                    company: "Tata Consultancy Services", 
+                    description: "Looking for a CTO with leadership experience in technology and innovation."
+                },
+                profileData: {
+                    name: "Complete User",
+                    designation: "Head of IT",
+                    email: "complete@example.com",
+                    phone: "+91 9876543210",
+                    address: "Bangalore, India",
+                    linkedin: "https://linkedin.com/in/completeuser",
+                    skills: "Leadership, Technology Management, IT Strategy, Cloud Computing, Team Management",
+                    education: "B.Tech Computer Science, IIT Bangalore",
+                    languages: "English, Hindi, Kannada",
+                    workExperience: [
+                        {
+                            designation: "Head of IT",
+                            company: "TechCorp Ltd",
+                            location: "Bangalore, India",
+                            startDate: "2020-01",
+                            endDate: "",
+                            current: true,
+                            description: "Leading IT strategy, managing cross-functional teams, and driving digital transformation initiatives"
+                        },
+                        {
+                            designation: "Senior IT Manager",
+                            company: "InnovateTech",
+                            location: "Mumbai, India", 
+                            startDate: "2018-06",
+                            endDate: "2019-12",
+                            current: false,
+                            description: "Managed IT operations, implemented new systems, and optimized infrastructure"
+                        }
+                    ],
+                    certificates: [
+                        {
+                            name: "AWS Solutions Architect",
+                            issuer: "Amazon Web Services",
+                            issueDate: "2023-01",
+                            expiryDate: "2026-01",
+                            credentialId: "AWS123456"
+                        },
+                        {
+                            name: "PMP Certification",
+                            issuer: "PMI",
+                            issueDate: "2022-06",
+                            expiryDate: "",
+                            credentialId: "PMP789012"
+                        }
+                    ]
+                }
+            };
+
+            log('inputData', 'COMPLETE PROFILE:');
+            log('inputData', JSON.stringify(testData, null, 2));
+
+            await sendTestRequest(testData);
+        }
+
+        async function sendTestRequest(testData) {
+            try {
+                const response = await fetch('http://localhost:4003/api/ai/customize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    log('debugLogs', 'RESPONSE RECEIVED SUCCESSFULLY');
+                    log('debugLogs', `Success: ${result.success}`);
+                    
+                    if (result.success && result.data) {
+                        log('debugLogs', `ATS Score: ${result.data.atsScore}`);
+                        log('debugLogs', `Keywords Matched: ${JSON.stringify(result.data.keywordsMatched)}`);
+                        
+                        // Display the generated HTML
+                        document.getElementById('generatedResume').innerHTML = result.data.customizedContent;
+                        
+                        // Check what sections are actually included
+                        const resumeContent = result.data.customizedContent;
+                        const hasWorkExp = resumeContent.includes('Work Experience') && (resumeContent.includes('<h3>') || resumeContent.includes('experience-item'));
+                        const hasCerts = resumeContent.includes('Professional Certificates') && resumeContent.includes('certificate');
+                        const hasSkills = resumeContent.includes('Core Skills') && resumeContent.length > 500;
+                        
+                        log('debugLogs', `\\nSECTION ANALYSIS:`);
+                        log('debugLogs', `- Work Experience: ${hasWorkExp ? '✅ FOUND' : '❌ MISSING'}`);
+                        log('debugLogs', `- Certificates: ${hasCerts ? '✅ FOUND' : '❌ MISSING'}`);
+                        log('debugLogs', `- Skills: ${hasSkills ? '✅ FOUND' : '❌ MINIMAL'}`);
+                        log('debugLogs', `- Content Length: ${resumeContent.length} characters`);
+                        
+                        if (!hasWorkExp && !hasCerts) {
+                            showStatus('⚠️ Issue Found: Missing Work Experience and Certificates sections', 'error');
+                        } else {
+                            showStatus('✅ Resume generated successfully with all sections', 'success');
+                        }
+                    } else {
+                        log('debugLogs', `Error: ${result.error || 'Unknown error'}`);
+                        showStatus('❌ Error in response data', 'error');
+                    }
+                } else {
+                    const errorText = await response.text();
+                    log('debugLogs', `HTTP Error: ${response.status} - ${errorText}`);
+                    showStatus('❌ HTTP error from backend', 'error');
+                }
+            } catch (error) {
+                log('debugLogs', `Network Error: ${error.message}`);
+                showStatus('❌ Network error occurred', 'error');
+            }
+        }
+
+        // Initialize
+        window.onload = () => {
+            showStatus('🔍 Minimal Resume Debug ready. Click buttons to test different scenarios!', 'success');
+        };
+    </script>
+</body>
+</html>

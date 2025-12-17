@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Resume Template</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .test-btn {
+            display: inline-block;
+            background: #2563eb;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            margin: 10px 10px 10px 0;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+        }
+        .test-btn:hover { background: #1d4ed8; }
+        .resume-preview {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-top: 20px;
+            background: white;
+        }
+        .header h1 { margin: 0; font-size: 24px; color: #2563eb; }
+        .header h2 { margin: 5px 0; font-size: 18px; color: #666; }
+        .contact-info p { margin: 5px 0; font-size: 14px; color: #555; }
+        .professional-summary { margin: 15px 0; }
+        .section { margin: 20px 0; }
+        .section h2 { color: #374151; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+        .experience-item { margin: 15px 0; }
+        .experience-item h3 { margin: 5px 0; color: #2563eb; }
+        .experience-item h4 { margin: 5px 0; color: #666; font-weight: normal; }
+        .date-range { color: #888; font-size: 14px; margin: 5px 0; }
+        .experience-item ul { margin: 10px 0 10px 20px; }
+        .experience-item li { margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Resume Template Test</h1>
+        <p>Test the updated backend resume generation using Nagarjun's exact format.</p>
+        
+        <button class="test-btn" onclick="testResumeGeneration()">🚀 Test Resume Generation</button>
+        <button class="test-btn" onclick="testBackendHealth()">🏥 Test Backend Health</button>
+        
+        <div id="status" style="margin: 20px 0;"></div>
+        <div id="resume-preview" class="resume-preview" style="display: none;"></div>
+    </div>
+
+    <script>
+        async function testBackendHealth() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = '⏳ Testing backend connection...';
+            
+            try {
+                const response = await fetch('http://localhost:4003/health');
+                const data = await response.json();
+                
+                statusDiv.innerHTML = `
+                    <div style="background: #d1ecf1; color: #0c5460; padding: 15px; border-radius: 6px;">
+                        ✅ Backend is running successfully!<br>
+                        Status: ${data.status}<br>
+                        Features: ${data.features.join(', ')}<br>
+                        Timestamp: ${data.timestamp}
+                    </div>
+                `;
+            } catch (error) {
+                statusDiv.innerHTML = `
+                    <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 6px;">
+                        ❌ Backend connection failed!<br>
+                        Error: ${error.message}<br>
+                        Make sure backend is running: <code>PORT=4003 node start-backend.js</code>
+                    </div>
+                `;
+            }
+        }
+        
+        async function testResumeGeneration() {
+            const statusDiv = document.getElementById('status');
+            const previewDiv = document.getElementById('resume-preview');
+            
+            statusDiv.innerHTML = '⏳ Generating resume using new template...';
+            
+            // Sample test data
+            const testData = {
+                jobData: {
+                    title: 'Senior Operations Manager',
+                    company: 'Tech Innovations Ltd',
+                    description: 'We are looking for an experienced operations manager to lead our team. The role involves project management, team leadership, process improvement, and stakeholder management. Experience with software development, SaaS platforms, and AI-driven solutions is preferred.'
+                },
+                profileData: {
+                    name: 'Nagarjun B J',
+                    designation: 'Managing Director',
+                    email: 'naga.nagarjun@gmail.com',
+                    linkedin: 'https://www.linkedin.com/in/nagarjunbhoopalam',
+                    phone: '+91 9535577330',
+                    location: 'Bengaluru, Karnataka, IN',
+                    skills: 'AI Development, SaaS Solutions, Team Leadership, Project Management',
+                    education: 'B.com',
+                    workExperience: [
+                        {
+                            designation: 'Managing Director',
+                            company: 'site.kuposu.co',
+                            location: 'Bengaluru, Karnataka, India',
+                            startDate: '2023-01-01',
+                            current: true,
+                            description: 'Leading an AI-driven software development company, offering tailored solutions through a dedicated team of expert developers. Specialized in IoT GPS tracking, automation tools, and SaaS development.'
+                        },
+                        {
+                            designation: 'Assistant Manager',
+                            company: 'Bitla Software',
+                            location: 'Bengaluru, KA, India',
+                            startDate: '2021-01-01',
+                            endDate: '2022-12-01',
+                            description: 'Managed end-to-end product development from requirement gathering to deployment. Led cross-functional teams and maintained client relationships.'
+                        }
+                    ]
+                }
+            };
+            
+            try {
+                const response = await fetch('http://localhost:4003/api/ai/customize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                
+                statusDiv.innerHTML = `
+                    <div style="background: #d1ecf1; color: #0c5460; padding: 15px; border-radius: 6px;">
+                        ✅ Resume generated successfully!<br>
+                        ATS Score: ${result.data.atsScore}%<br>
+                        Keywords Matched: ${result.data.keywordsMatched.length}<br>
+                        Processing Model: ${result.metadata.model}
+                    </div>
+                `;
+                
+                // Show the generated resume
+                previewDiv.innerHTML = result.data.customizedContent;
+                previewDiv.style.display = 'block';
+                
+            } catch (error) {
+                statusDiv.innerHTML = `
+                    <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 6px;">
+                        ❌ Resume generation failed!<br>
+                        Error: ${error.message}<br>
+                        Check backend logs for details
+                    </div>
+                `;
+            }
+        }
+        
+        // Auto-test backend health on page load
+        window.onload = () => {
+            setTimeout(testBackendHealth, 1000);
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work Experience Debug Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9fafb;
+        }
+        .btn {
+            background: #2563eb;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+            font-weight: 500;
+        }
+        .btn:hover { background: #1d4ed8; }
+        .status {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+        .status.success { background: #d1ecf1; color: #0c5460; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .status.info { background: #fff3cd; color: #856404; }
+        .debug-output {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .comparison-box {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            background: white;
+        }
+        .comparison-box h4 {
+            margin: 0 0 10px 0;
+            color: #1f2937;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Work Experience Enhancement Debug</h1>
+        <p>Debug why work experience descriptions are not being updated properly.</p>
+        
+        <div id="status"></div>
+        
+        <div class="test-section">
+            <h3>🧪 Test Work Experience Enhancement</h3>
+            <p>Send specific test data to see if work experience gets enhanced</p>
+            
+            <button class="btn" onclick="testWorkExperienceEnhancement()">🚀 Test Work Experience Enhancement</button>
+            <button class="btn" onclick="testSimpleMockData()">🎯 Test with Simple Data</button>
+            <button class="btn" onclick="testJobKeywordExtraction()">📋 Test Job Keyword Extraction</button>
+        </div>
+
+        <div class="comparison">
+            <div class="comparison-box">
+                <h4>📥 Input Work Experience</h4>
+                <div class="debug-output" id="inputExperience">Input work experience will appear here...</div>
+            </div>
+            
+            <div class="comparison-box">
+                <h4>📤 Enhanced Work Experience</h4>
+                <div class="debug-output" id="enhancedExperience">Enhanced work experience will appear here...</div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h4>🔧 Debug Information</h4>
+            <div class="debug-output" id="debugInfo">Debug information will appear here...</div>
+        </div>
+
+        <div class="test-section">
+            <h4>🎨 Final Resume HTML</h4>
+            <div id="finalResume" style="border: 1px solid #ddd; padding: 15px; border-radius: 6px; background: white;">
+                Final resume HTML will appear here...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function log(elementId, message) {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            element.textContent += `[${timestamp}] ${message}\n`;
+            element.scrollTop = element.scrollHeight;
+        }
+
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        async function testWorkExperienceEnhancement() {
+            showStatus('🧪 Testing work experience enhancement...', 'info');
+            
+            // Clear previous results
+            document.getElementById('inputExperience').textContent = '';
+            document.getElementById('enhancedExperience').textContent = '';
+            document.getElementById('debugInfo').textContent = '';
+            document.getElementById('finalResume').innerHTML = '';
+
+            // Create test data with keywords that should trigger enhancements
+            const jobData = {
+                title: "Senior Full Stack Developer",
+                company: "Google",
+                description: "We're looking for a Senior Full Stack Developer with expertise in JavaScript, Python, React, Node.js, AWS, leadership, microservices, and agile methodologies. Must have 5+ years of experience leading teams and building scalable applications."
+            };
+
+            const profileData = {
+                name: "Nagarjun B J",
+                designation: "Senior Software Engineer", // Key field!
+                email: "nagarjun@example.com",
+                skills: "JavaScript, React, Node.js, Python, Leadership",
+                workExperience: [
+                    {
+                        designation: "Senior Software Engineer",
+                        company: "Tech Solutions Ltd",
+                        startDate: "2021-01",
+                        endDate: "",
+                        current: true,
+                        description: "Led development of web applications using React and Node.js"
+                    },
+                    {
+                        designation: "Software Developer", 
+                        company: "StartupXYZ",
+                        startDate: "2019-06",
+                        endDate: "2021-01",
+                        current: false,
+                        description: "Developed full-stack applications using JavaScript technologies"
+                    }
+                ]
+            };
+
+            // Show input data
+            log('inputExperience', 'INPUT JOB DATA:');
+            log('inputExperience', JSON.stringify(jobData, null, 2));
+            log('inputExperience', '\nINPUT WORK EXPERIENCE:');
+            profileData.workExperience.forEach((exp, index) => {
+                log('inputExperience', `${index + 1}. ${exp.designation} at ${exp.company}`);
+                log('inputExperience', `   Description: ${exp.description}`);
+                log('inputExperience', '');
+            });
+
+            try {
+                log('debugInfo', 'Sending AI customization request...');
+                
+                const response = await fetch('http://localhost:4003/api/ai/customize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        jobData: jobData,
+                        profileData: profileData
+                    })
+                });
+
+                log('debugInfo', `Response Status: ${response.status}`);
+
+                if (response.ok) {
+                    const result = await response.json();
+                    log('debugInfo', 'Response received successfully');
+                    log('debugInfo', `Success: ${result.success}`);
+                    
+                    if (result.success && result.data) {
+                        // Show enhanced work experience in the customized content
+                        log('enhancedExperience', 'ENHANCED RESUME HTML:');
+                        log('enhancedExperience', result.data.customizedContent);
+                        
+                        // Display the actual rendered HTML
+                        document.getElementById('finalResume').innerHTML = result.data.customizedContent;
+                        
+                        // Check if work experience section contains bullet points
+                        const workExpSection = result.data.customizedContent;
+                        if (workExpSection.includes('<li>') || workExpSection.includes('•')) {
+                            showStatus('✅ Work experience enhancement appears to be working (found bullet points)', 'success');
+                        } else if (workExpSection.includes('Led development') && workExpSection !== profileData.workExperience[0].description) {
+                            showStatus('✅ Work experience descriptions appear to be enhanced', 'success');
+                        } else {
+                            showStatus('⚠️ Work experience may not be getting enhanced properly', 'error');
+                        }
+
+                        log('debugInfo', `ATS Score: ${result.data.atsScore}`);
+                        log('debugInfo', `Keywords Matched: ${result.data.keywordsMatched?.length || 0}`);
+                        log('debugInfo', `Recommendations: ${result.data.recommendations?.length || 0}`);
+                    } else {
+                        log('debugInfo', `Error: ${result.error || 'Unknown error'}`);
+                        showStatus('❌ AI customization failed', 'error');
+                    }
+                } else {
+                    const errorText = await response.text();
+                    log('debugInfo', `HTTP Error: ${errorText}`);
+                    showStatus('❌ HTTP error from backend', 'error');
+                }
+            } catch (error) {
+                log('debugInfo', `Network Error: ${error.message}`);
+                showStatus('❌ Network error occurred', 'error');
+            }
+        }
+
+        async function testSimpleMockData() {
+            showStatus('🎯 Testing with simple mock data...', 'info');
+            
+            document.getElementById('debugInfo').textContent = '';
+            
+            const simpleData = {
+                jobData: {
+                    title: "Developer",
+                    company: "TestCorp", 
+                    description: "JavaScript React Node.js leadership"
+                },
+                profileData: {
+                    name: "Test User",
+                    designation: "Developer",
+                    workExperience: [
+                        {
+                            designation: "Developer",
+                            company: "TestCorp",
+                            description: "Basic development work"
+                        }
+                    ]
+                }
+            };
+
+            try {
+                const response = await fetch('http://localhost:4003/api/ai/customize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(simpleData)
+                });
+
+                const result = await response.json();
+                log('debugInfo', 'SIMPLE TEST RESULT:');
+                log('debugInfo', JSON.stringify(result, null, 2));
+                
+                if (result.success) {
+                    showStatus('✅ Simple test passed', 'success');
+                } else {
+                    showStatus('❌ Simple test failed', 'error');
+                }
+            } catch (error) {
+                log('debugInfo', `Simple test error: ${error.message}`);
+                showStatus('❌ Simple test failed with network error', 'error');
+            }
+        }
+
+        async function testJobKeywordExtraction() {
+            log('debugInfo', 'Testing job keyword extraction logic...');
+            
+            const jobDescription = "We need a Senior Full Stack Developer with JavaScript, Python, React, Node.js, AWS, leadership, microservices, and agile experience.";
+            
+            // Simulate keyword extraction (this should match the backend logic)
+            const keywords = jobDescription.toLowerCase().match(/\b(javascript|python|react|node\.?js|aws|leadership|microservices|agile|docker|kubernetes|devops|api|cloud|scrum|management|ai|automation)\b/g) || [];
+            
+            log('debugInfo', 'JOB DESCRIPTION:');
+            log('debugInfo', jobDescription);
+            log('debugInfo', '\nEXTRACTED KEYWORDS:');
+            log('debugInfo', JSON.stringify(keywords, null, 2));
+            
+            if (keywords.length > 0) {
+                showStatus(`✅ Keyword extraction working (found ${keywords.length} keywords)`, 'success');
+            } else {
+                showStatus('❌ No keywords extracted', 'error');
+            }
+        }
+
+        // Initialize
+        window.onload = () => {
+            showStatus('🔍 Work Experience Enhancement Debug ready. Click buttons to test!', 'success');
+        };
+    </script>
+</body>
+</html>

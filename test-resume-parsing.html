@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Parsing Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .upload-section {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .upload-section:hover { border-color: #2563eb; }
+        .upload-section.dragover { border-color: #2563eb; background: #eff6ff; }
+        .btn {
+            background: #2563eb;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+            font-weight: 500;
+        }
+        .btn:hover { background: #1d4ed8; }
+        .btn:disabled { background: #9ca3af; cursor: not-allowed; }
+        .status {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+        .status.success { background: #d1ecf1; color: #0c5460; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .status.info { background: #fff3cd; color: #856404; }
+        .results {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .result-section {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .result-section h4 {
+            margin: 0 0 10px 0;
+            color: #1f2937;
+        }
+        .extracted-data {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📄 Resume Parsing Test</h1>
+        <p>Test the actual resume parsing functionality that powers the "Parse Resume" button.</p>
+        
+        <div id="status"></div>
+        
+        <div class="upload-section" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+            <h3>📁 Upload Resume for Testing</h3>
+            <p>Drop a PDF or DOCX resume file here, or click to browse</p>
+            <input type="file" id="fileInput" accept=".pdf,.doc,.docx" style="display: none;">
+        </div>
+        
+        <div style="text-align: center; margin: 20px 0;">
+            <button class="btn" id="parseBtn" onclick="testResumeParsing()" disabled>🔍 Parse Resume</button>
+            <button class="btn" onclick="testWithSampleData()">🧪 Test with Sample Data</button>
+        </div>
+        
+        <div class="results" id="results" style="display: none;">
+            <div class="result-section">
+                <h4>📊 Extracted Profile Data</h4>
+                <div class="extracted-data" id="profileData"></div>
+            </div>
+            
+            <div class="result-section">
+                <h4>💼 Extracted Work Experience</h4>
+                <div class="extracted-data" id="workExperience"></div>
+            </div>
+        </div>
+        
+        <div class="result-section" style="margin-top: 20px; display: none;" id="rawTextSection">
+            <h4>📝 Raw Extracted Text (First 1000 chars)</h4>
+            <div class="extracted-data" id="rawText"></div>
+        </div>
+    </div>
+
+    <script>
+        let uploadedFile = null;
+
+        function showStatus(message, type = 'success') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        // File upload handling
+        document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+        
+        const uploadArea = document.getElementById('uploadArea');
+        uploadArea.addEventListener('dragover', handleDragOver);
+        uploadArea.addEventListener('drop', handleFileDrop);
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        }
+
+        function handleFileDrop(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                processFile(files[0]);
+            }
+        }
+
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                processFile(file);
+            }
+        }
+
+        function processFile(file) {
+            const validTypes = [
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            ];
+            
+            if (!validTypes.includes(file.type)) {
+                showStatus('Please upload a PDF or DOCX file.', 'error');
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) {
+                showStatus('File size too large. Please upload a file smaller than 10MB.', 'error');
+                return;
+            }
+
+            uploadedFile = file;
+            showStatus(`📁 File "${file.name}" uploaded successfully (${(file.size / 1024).toFixed(1)} KB)`, 'success');
+            document.getElementById('parseBtn').disabled = false;
+        }
+
+        async function testResumeParsing() {
+            if (!uploadedFile) {
+                showStatus('Please upload a resume file first.', 'error');
+                return;
+            }
+
+            showStatus('⏳ Parsing resume...', 'info');
+
+            try {
+                // Convert file to base64
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    const fileData = e.target.result;
+                    
+                    // Call backend API
+                    const response = await fetch('http://localhost:4003/api/parse-resume', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            fileData: fileData,
+                            fileName: uploadedFile.name,
+                            fileType: uploadedFile.type
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Server error: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        displayResults(result.data);
+                        showStatus('✅ Resume parsed successfully!', 'success');
+                    } else {
+                        throw new Error(result.details || 'Parsing failed');
+                    }
+                };
+                reader.readAsDataURL(uploadedFile);
+
+            } catch (error) {
+                showStatus(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function testWithSampleData() {
+            showStatus('🧪 Testing with sample resume data...', 'info');
+            
+            // Sample parsed data
+            const sampleData = {
+                name: "John Smith",
+                email: "john.smith@email.com",
+                phone: "+1 (555) 123-4567",
+                address: "San Francisco, CA",
+                linkedin: "https://linkedin.com/in/johnsmith",
+                skills: "JavaScript, Python, React, Node.js, AWS, Docker, Agile, Leadership",
+                education: "B.S. Computer Science, Stanford University, 2018",
+                languages: "English (Native), Spanish (Professional Working)",
+                workExperience: [
+                    {
+                        id: "1",
+                        designation: "Senior Software Engineer",
+                        company: "Tech Corp",
+                        startDate: "2021-01",
+                        endDate: "",
+                        current: true,
+                        description: "Led development of microservices architecture serving 1M+ users. Implemented CI/CD pipelines reducing deployment time by 60%. Mentored junior developers and conducted code reviews."
+                    },
+                    {
+                        id: "2",
+                        designation: "Software Developer",
+                        company: "StartupXYZ",
+                        startDate: "2019-06",
+                        endDate: "2021-01",
+                        current: false,
+                        description: "Developed full-stack web applications using React and Node.js. Collaborated with design team to implement responsive user interfaces. Optimized database queries improving performance by 40%."
+                    }
+                ]
+            };
+
+            displayResults(sampleData);
+            showStatus('✅ Sample data loaded successfully!', 'success');
+        }
+
+        function displayResults(data) {
+            // Show results
+            document.getElementById('results').style.display = 'grid';
+            
+            // Display profile data
+            const profileData = {
+                name: data.name || 'Not found',
+                email: data.email || 'Not found',
+                phone: data.phone || 'Not found',
+                address: data.address || 'Not found',
+                linkedin: data.linkedin || 'Not found',
+                skills: data.skills || 'Not found',
+                education: data.education || 'Not found',
+                languages: data.languages || 'Not found'
+            };
+            
+            document.getElementById('profileData').textContent = JSON.stringify(profileData, null, 2);
+            
+            // Display work experience
+            const workExp = data.workExperience || [];
+            document.getElementById('workExperience').textContent = JSON.stringify(workExp, null, 2);
+        }
+
+        // Initialize
+        window.onload = () => {
+            showStatus('🚀 Resume parsing test ready. Upload a resume to get started!', 'success');
+        };
+    </script>
+</body>
+</html>

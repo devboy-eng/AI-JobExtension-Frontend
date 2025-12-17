@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keywords → Skills Mapping Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9fafb;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+        .form-group textarea {
+            height: 120px;
+            resize: vertical;
+        }
+        .btn {
+            background: #2563eb;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            margin: 10px 10px 10px 0;
+            font-weight: 500;
+        }
+        .btn:hover { background: #1d4ed8; }
+        .btn:disabled { background: #9ca3af; cursor: not-allowed; }
+        .results {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .result-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            background: white;
+        }
+        .result-card h4 {
+            margin: 0 0 10px 0;
+            color: #2563eb;
+        }
+        .keyword-matched {
+            background: #d1fae5;
+            border-color: #86efac;
+        }
+        .keyword-missing {
+            background: #fef2f2;
+            border-color: #fca5a5;
+        }
+        .skills-generated {
+            background: #eff6ff;
+            border-color: #93c5fd;
+        }
+        .status {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+        }
+        .status.success { background: #d1ecf1; color: #0c5460; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .highlight {
+            background: #fef3c7;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+        .priority-indicator {
+            color: #dc2626;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Keywords → Skills Mapping Test</h1>
+        <p>Test how "Keywords Matched" directly influence the "Core Skills" section.</p>
+
+        <div id="status"></div>
+
+        <div class="test-section">
+            <h3>📝 Test Job Requirements</h3>
+            <div class="form-group">
+                <label>Job Title:</label>
+                <input type="text" id="jobTitle" value="Senior Full Stack Developer">
+            </div>
+            <div class="form-group">
+                <label>Job Description:</label>
+                <textarea id="jobDescription">We are looking for a Senior Full Stack Developer with the following skills:
+
+Required Technologies:
+• JavaScript and TypeScript proficiency
+• React and Node.js experience
+• Python for backend development
+• AWS cloud platform knowledge
+• Docker and Kubernetes containerization
+• REST API development
+
+Preferred Skills:
+• Agile methodology experience
+• Project management skills
+• Team leadership capabilities
+• DevOps practices
+• Machine learning basics
+
+The ideal candidate will have 5+ years of software development experience and strong problem-solving abilities.</textarea>
+            </div>
+
+            <h4>Your Current Profile Skills:</h4>
+            <div class="form-group">
+                <textarea id="profileSkills">AI Development, SaaS Solutions, Team Leadership, JavaScript, Software Development, Operations Management</textarea>
+            </div>
+
+            <button class="btn" onclick="testKeywordSkillsMapping()">🧪 Test Keywords → Skills Mapping</button>
+        </div>
+
+        <div class="results" id="results" style="display: none;">
+            <div class="result-card keyword-matched">
+                <h4>🟢 Keywords Matched</h4>
+                <p><em>Skills already in your profile that match the job:</em></p>
+                <div id="keywordsMatched">Loading...</div>
+            </div>
+
+            <div class="result-card keyword-missing">
+                <h4>🔴 Keywords Missing</h4>
+                <p><em>Important skills from job that you're missing:</em></p>
+                <div id="keywordsMissing">Loading...</div>
+            </div>
+
+            <div class="result-card skills-generated">
+                <h4>⚡ Generated Core Skills</h4>
+                <p><em>Your CV will show these skills (matched first, then missing added):</em></p>
+                <div id="skillsGenerated">Loading...</div>
+            </div>
+        </div>
+
+        <div class="test-section" style="display: none;" id="detailedAnalysis">
+            <h3>🔬 Detailed Analysis</h3>
+            <div id="analysisDetails"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 Try Different Job Types</h3>
+            <button class="btn" onclick="loadSampleJob('software')">💻 Software Engineer</button>
+            <button class="btn" onclick="loadSampleJob('marketing')">📈 Marketing Manager</button>
+            <button class="btn" onclick="loadSampleJob('operations')">🔧 Operations Director</button>
+            <button class="btn" onclick="loadSampleJob('data')">📊 Data Scientist</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:4003/api';
+
+        function showStatus(message, type = 'success') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        async function testKeywordSkillsMapping() {
+            const resultsDiv = document.getElementById('results');
+            const detailedDiv = document.getElementById('detailedAnalysis');
+
+            showStatus('⏳ Analyzing keyword-to-skills mapping...', 'success');
+
+            const jobData = {
+                title: document.getElementById('jobTitle').value,
+                company: 'Test Company',
+                description: document.getElementById('jobDescription').value
+            };
+
+            const profileData = {
+                name: 'Test User',
+                designation: 'Software Professional',
+                skills: document.getElementById('profileSkills').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/ai/customize`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ jobData, profileData })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayResults(result.data, jobData, profileData);
+                    resultsDiv.style.display = 'grid';
+                    detailedDiv.style.display = 'block';
+                    showStatus('✅ Keywords → Skills mapping analysis complete!', 'success');
+                } else {
+                    throw new Error(result.error || 'Unknown error');
+                }
+
+            } catch (error) {
+                showStatus(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function displayResults(data, jobData, profileData) {
+            // Keywords Matched
+            document.getElementById('keywordsMatched').innerHTML = 
+                data.keywordsMatched.length > 0 
+                    ? data.keywordsMatched.map(keyword => `<span class="highlight">${keyword}</span>`).join(', ')
+                    : '<em>No matching keywords found</em>';
+
+            // Keywords Missing  
+            document.getElementById('keywordsMissing').innerHTML =
+                data.keywordsMissing.length > 0
+                    ? data.keywordsMissing.map(keyword => `<span class="highlight">${keyword}</span>`).join(', ')
+                    : '<em>No missing keywords</em>';
+
+            // Generated Core Skills (extract from resume content)
+            const skillsMatch = data.customizedContent.match(/<h2>Core Skills<\/h2>\s*<p>([^<]+)<\/p>/);
+            const generatedSkills = skillsMatch ? skillsMatch[1].trim() : 'Skills not found';
+            
+            // Highlight matched vs new skills
+            const skillsArray = generatedSkills.split(', ');
+            const matchedKeywords = data.keywordsMatched.map(k => k.toLowerCase());
+            
+            const highlightedSkills = skillsArray.map(skill => {
+                const skillLower = skill.toLowerCase();
+                const isMatched = matchedKeywords.some(mk => skillLower.includes(mk) || mk.includes(skillLower));
+                
+                if (isMatched) {
+                    return `<span class="priority-indicator">🔥 ${skill}</span>`;
+                } else {
+                    return skill;
+                }
+            });
+
+            document.getElementById('skillsGenerated').innerHTML = highlightedSkills.join(', ');
+
+            // Detailed Analysis
+            const analysisDetails = `
+                <div style="background: white; padding: 20px; border-radius: 8px;">
+                    <h4>📊 Mapping Analysis</h4>
+                    <p><strong>ATS Score:</strong> ${data.atsScore}%</p>
+                    <p><strong>Total Skills in Resume:</strong> ${skillsArray.length}</p>
+                    <p><strong>Matched Keywords Prioritized:</strong> ${data.keywordsMatched.length} 
+                        <span style="color: #dc2626;">(🔥 marked with fire)</span></p>
+                    <p><strong>New Skills Added:</strong> ${skillsArray.length - data.keywordsMatched.length}</p>
+                    
+                    <hr style="margin: 20px 0;">
+                    
+                    <h4>🎯 How It Works:</h4>
+                    <ol>
+                        <li><strong>Keywords Matched</strong> are placed FIRST in Core Skills</li>
+                        <li><strong>Missing Keywords</strong> from job are added as new skills</li>
+                        <li><strong>Relevant base skills</strong> are included to complete the section</li>
+                        <li><strong>Result:</strong> Skills section perfectly aligned with job requirements</li>
+                    </ol>
+
+                    <h4>📈 Recommendations:</h4>
+                    <ul>
+                        ${data.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+            
+            document.getElementById('analysisDetails').innerHTML = analysisDetails;
+        }
+
+        function loadSampleJob(type) {
+            const samples = {
+                software: {
+                    title: 'Senior Software Engineer',
+                    description: `We need a Senior Software Engineer with expertise in:
+• JavaScript, TypeScript, and React
+• Node.js and Python backend development 
+• AWS, Docker, and Kubernetes
+• REST APIs and microservices
+• Agile development and team leadership
+• DevOps practices and CI/CD pipelines`
+                },
+                marketing: {
+                    title: 'Digital Marketing Manager', 
+                    description: `Looking for a Digital Marketing Manager with:
+• Social media marketing and content creation
+• Influencer marketing and brand management
+• Data analysis and campaign optimization
+• Project management and team leadership
+• SaaS platform experience
+• B2B marketing strategies`
+                },
+                operations: {
+                    title: 'Operations Director',
+                    description: `Operations Director position requiring:
+• Operations management and process improvement
+• Supply chain management and procurement
+• Team leadership and organizational development
+• Project management and stakeholder management
+• Data analysis and performance metrics
+• Automation and AI tool implementation`
+                },
+                data: {
+                    title: 'Senior Data Scientist',
+                    description: `Senior Data Scientist role needing:
+• Python and machine learning expertise
+• SQL and data analysis skills
+• AI and automation experience
+• Cloud platforms (AWS, Azure)
+• Statistical analysis and data visualization
+• Team leadership and project management`
+                }
+            };
+
+            const sample = samples[type];
+            document.getElementById('jobTitle').value = sample.title;
+            document.getElementById('jobDescription').value = sample.description;
+        }
+    </script>
+</body>
+</html>

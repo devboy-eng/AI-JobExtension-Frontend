@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedIn Job Data Extractor - Debug Tool</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2563eb;
+            margin-bottom: 20px;
+        }
+        .debug-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .debug-section h3 {
+            margin-top: 0;
+            color: #374151;
+        }
+        .btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 10px 10px 0;
+            font-weight: 500;
+        }
+        .btn:hover {
+            background: #1d4ed8;
+        }
+        .btn.success {
+            background: #10b981;
+        }
+        .btn.error {
+            background: #ef4444;
+        }
+        .output {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            margin-top: 10px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .status.success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        .status.error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+        .status.warning {
+            background: #fefce8;
+            color: #ca8a04;
+            border: 1px solid #fef08a;
+        }
+        .instructions {
+            background: #eff6ff;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #bfdbfe;
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 LinkedIn Job Data Extractor - Debug Tool</h1>
+        
+        <div class="instructions">
+            <strong>Instructions:</strong>
+            <ol>
+                <li>Navigate to a LinkedIn job posting page (like the one you mentioned)</li>
+                <li>Open Chrome Developer Tools (F12)</li>
+                <li>Go to the Console tab</li>
+                <li>Copy and paste the debug script below</li>
+                <li>Press Enter to run the script</li>
+                <li>Check the results to see what data is being extracted</li>
+            </ol>
+        </div>
+
+        <div class="debug-section">
+            <h3>🧪 Debug Script for LinkedIn Job Page</h3>
+            <p>Copy this script and run it in the Chrome console while on the LinkedIn job page:</p>
+            
+            <button class="btn" onclick="copyToClipboard('debugScript')">📋 Copy Debug Script</button>
+            
+            <div class="output" id="debugScript">
+// LinkedIn Job Data Extractor Debug Script
+console.log('🔍 Starting LinkedIn job data extraction debug...');
+
+// Check if we're on a LinkedIn job page
+const currentUrl = window.location.href;
+console.log('Current URL:', currentUrl);
+
+if (!currentUrl.includes('linkedin.com/jobs')) {
+    console.error('❌ Not on a LinkedIn jobs page!');
+    console.log('Please navigate to a LinkedIn job posting first.');
+} else {
+    console.log('✅ On LinkedIn jobs page');
+}
+
+// Function to extract job title
+function extractJobTitle() {
+    const selectors = [
+        'h1.top-card-layout__title',
+        '.job-details-jobs-unified-top-card__job-title h1',
+        '.job-details-jobs-unified-top-card__job-title a',
+        'h1[data-test-id="job-title"]',
+        '.jobs-unified-top-card__job-title h1',
+        '.jobs-unified-top-card__job-title a',
+        '.job-details__job-title h1',
+        '.jobs-details__job-title h1',
+        'h1.jobs-details__job-title',
+        '.job-details-jobs-unified-top-card__job-title',
+        '[data-test-id*="job-title"] h1',
+        'h1[class*="job-title"]'
+    ];
+
+    console.log('🏷️ Trying to extract job title...');
+    
+    for (const selector of selectors) {
+        const element = document.querySelector(selector);
+        if (element && element.textContent.trim()) {
+            const title = element.textContent.trim();
+            console.log('✅ Job title found:', title);
+            return title;
+        }
+    }
+
+    // Fallback: try to find any h1 that might be the job title
+    const h1Elements = document.querySelectorAll('h1');
+    for (const h1 of h1Elements) {
+        const text = h1.textContent.trim();
+        if (text && text.length > 5 && text.length < 100 && !text.toLowerCase().includes('linkedin')) {
+            console.log('✅ Job title found (fallback):', text);
+            return text;
+        }
+    }
+
+    console.log('❌ Job title not found');
+    return 'Job Title Not Found';
+}
+
+// Function to extract company name
+function extractCompanyName() {
+    const selectors = [
+        '.job-details-jobs-unified-top-card__company-name a',
+        '.job-details-jobs-unified-top-card__company-name',
+        'a[data-test-id="job-detail-company-link"]',
+        '.jobs-unified-top-card__company-name a',
+        '.topcard__flavor--company a'
+    ];
+
+    console.log('🏢 Trying to extract company name...');
+
+    for (const selector of selectors) {
+        const element = document.querySelector(selector);
+        if (element && element.textContent.trim()) {
+            const company = element.textContent.trim();
+            console.log('✅ Company found:', company);
+            return company;
+        }
+    }
+
+    console.log('❌ Company name not found');
+    return 'Company Not Found';
+}
+
+// Function to extract job description
+function extractJobDescription() {
+    const selectors = [
+        '.jobs-description-content__text',
+        '.job-view-layout .jobs-description',
+        '.jobs-box__html-content',
+        '.jobs-description__content',
+        '.jobs-description',
+        '.job-details-jobs-unified-top-card__job-description',
+        '[data-test-id*="job-description"]',
+        '.jobs-details__job-description',
+        '.artdeco-card .jobs-description',
+        '.jobs-description-content',
+        '.job-description-content'
+    ];
+
+    console.log('📝 Trying to extract job description...');
+
+    for (const selector of selectors) {
+        const element = document.querySelector(selector);
+        if (element && element.textContent.trim()) {
+            const description = element.textContent.trim();
+            console.log('✅ Job description found (length: ' + description.length + ' characters)');
+            console.log('Description preview:', description.substring(0, 200) + '...');
+            return description;
+        }
+    }
+
+    console.log('❌ Job description not found');
+    return 'Job description not found';
+}
+
+// Extract all data
+const jobData = {
+    title: extractJobTitle(),
+    company: extractCompanyName(),
+    description: extractJobDescription(),
+    url: currentUrl,
+    extractedAt: new Date().toISOString()
+};
+
+console.log('📊 Final extracted data:');
+console.table(jobData);
+
+// Check if extraction was successful
+const isSuccessful = jobData.title !== 'Job Title Not Found' && 
+                    jobData.description !== 'Job description not found';
+
+if (isSuccessful) {
+    console.log('🎉 Job data extraction successful!');
+    console.log('You can now use the Chrome extension to customize your resume.');
+} else {
+    console.log('⚠️ Job data extraction had issues. Check the selectors or page structure.');
+    console.log('The LinkedIn page might still be loading or the structure might have changed.');
+}
+
+// Save to window for further inspection
+window.extractedJobData = jobData;
+console.log('💾 Data saved to window.extractedJobData for inspection');
+            </div>
+        </div>
+
+        <div class="debug-section">
+            <h3>🔧 Quick Test for Current Page</h3>
+            <p>If you're already on the LinkedIn job page, click this button to test extraction:</p>
+            
+            <button class="btn" onclick="testExtraction()">🧪 Test Job Data Extraction</button>
+            
+            <div id="testResults"></div>
+        </div>
+
+        <div class="debug-section">
+            <h3>❓ Common Issues & Solutions</h3>
+            <ul>
+                <li><strong>Job title not found:</strong> The page might still be loading, or LinkedIn changed their HTML structure</li>
+                <li><strong>Description not found:</strong> Try scrolling down to make sure the job description is loaded</li>
+                <li><strong>Extension not working:</strong> Make sure you've reloaded the extension in chrome://extensions/</li>
+                <li><strong>Backend errors:</strong> The AI features require backend setup with API keys</li>
+            </ul>
+        </div>
+
+        <div class="debug-section">
+            <h3>📝 Next Steps</h3>
+            <ol>
+                <li>Test the extraction script on your LinkedIn job page</li>
+                <li>If data is extracted successfully, the extension should work</li>
+                <li>For AI features, set up the backend with your OpenAI/Gemini API key</li>
+                <li>If extraction fails, the LinkedIn page structure may have changed</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Debug script copied to clipboard! Now paste it in the Chrome console.');
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                // Fallback for older browsers
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert('Debug script copied to clipboard!');
+            });
+        }
+
+        function testExtraction() {
+            const resultsDiv = document.getElementById('testResults');
+            
+            // Check if we're on the right domain
+            if (!window.location.href.includes('linkedin.com')) {
+                resultsDiv.innerHTML = `
+                    <div class="status error">
+                        ❌ This test only works when run on LinkedIn.com
+                        <br>Navigate to a LinkedIn job posting first.
+                    </div>
+                `;
+                return;
+            }
+
+            resultsDiv.innerHTML = `
+                <div class="status warning">
+                    ⚠️ For security reasons, this test can't access LinkedIn directly from this page.
+                    <br>Use the debug script in the Chrome console instead.
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

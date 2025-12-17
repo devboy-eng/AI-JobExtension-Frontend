@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Customization Data Flow Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9fafb;
+        }
+        .data-flow {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .data-box {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .btn {
+            background: #2563eb;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+            font-weight: 500;
+        }
+        .btn:hover { background: #1d4ed8; }
+        .btn:disabled { background: #9ca3af; cursor: not-allowed; }
+        .status {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+        .status.success { background: #d1ecf1; color: #0c5460; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .status.info { background: #fff3cd; color: #856404; }
+        .step-indicator {
+            background: #0073b1;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 AI Customization Data Flow Test</h1>
+        <p>Test what happens when you click "Customize Resume with AI" - see all data being processed step by step.</p>
+        
+        <div id="status"></div>
+        
+        <div class="test-section">
+            <h3>🔧 Test Configuration</h3>
+            <p>This test simulates the complete flow when clicking "Customize Resume with AI" button.</p>
+            
+            <button class="btn" onclick="testCompleteAIFlow()">🚀 Test Complete AI Customization Flow</button>
+            <button class="btn" onclick="testLinkedInDataExtraction()">📋 Test LinkedIn Data Only</button>
+            <button class="btn" onclick="testProfileData()">👤 Test Profile Data Only</button>
+            <button class="btn" onclick="testBackendAI()">🤖 Test Backend AI Response</button>
+        </div>
+
+        <div class="data-flow">
+            <div class="test-section">
+                <h4>📥 Input Data (What gets sent to AI)</h4>
+                <div class="step-indicator">STEP 1: Data Collection</div>
+                <div class="data-box" id="inputData">Click a test button to see input data...</div>
+            </div>
+            
+            <div class="test-section">
+                <h4>🔄 Processing Steps</h4>
+                <div class="step-indicator">STEP 2: AI Processing</div>
+                <div class="data-box" id="processingSteps">Processing steps will appear here...</div>
+            </div>
+        </div>
+
+        <div class="data-flow">
+            <div class="test-section">
+                <h4>📤 AI Response (What comes back from backend)</h4>
+                <div class="step-indicator">STEP 3: AI Output</div>
+                <div class="data-box" id="aiResponse">AI response will appear here...</div>
+            </div>
+            
+            <div class="test-section">
+                <h4>🎨 Final Resume (What user sees)</h4>
+                <div class="step-indicator">STEP 4: Final Result</div>
+                <div class="data-box" id="finalResume" style="color: #1f2937; background: white; border: 1px solid #ddd;">Final customized resume will appear here...</div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Data Flow Summary</h3>
+            <div id="summary" style="background: #f0f9ff; padding: 15px; border-radius: 6px;">
+                <p><strong>Complete Flow:</strong></p>
+                <ol>
+                    <li><strong>LinkedIn Job Detection:</strong> Extract job title, company, description, requirements</li>
+                    <li><strong>Profile Data Collection:</strong> Get user's name, designation, skills, work experience</li>
+                    <li><strong>AI Backend Call:</strong> Send combined data to /api/ai/customize endpoint</li>
+                    <li><strong>AI Processing:</strong> Generate professional summary, core skills, enhanced work experience</li>
+                    <li><strong>ATS Scoring:</strong> Calculate keyword matches and ATS compatibility score</li>
+                    <li><strong>Response Display:</strong> Show customized resume with metrics in popup</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function log(elementId, message) {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            element.textContent += `[${timestamp}] ${message}\n`;
+            element.scrollTop = element.scrollHeight;
+        }
+
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        async function testCompleteAIFlow() {
+            showStatus('🚀 Starting complete AI customization flow test...', 'info');
+            
+            // Clear previous results
+            document.getElementById('inputData').textContent = '';
+            document.getElementById('processingSteps').textContent = '';
+            document.getElementById('aiResponse').textContent = '';
+            document.getElementById('finalResume').textContent = '';
+
+            try {
+                // Step 1: Simulate LinkedIn job data extraction
+                log('processingSteps', '🔍 STEP 1: Extracting LinkedIn job data...');
+                const mockJobData = {
+                    title: "Senior Full Stack Developer",
+                    company: "Google",
+                    location: "San Francisco, CA",
+                    description: "We're looking for a Senior Full Stack Developer to join our team. You'll work with React, Node.js, Python, AWS, and lead a team of developers. Must have 5+ years of experience in software development, leadership skills, and experience with microservices architecture.",
+                    requirements: ["5+ years experience", "React/Node.js", "Python", "AWS", "Leadership"],
+                    skills: ["react", "nodejs", "python", "aws", "leadership", "microservices"],
+                    experience: "Senior",
+                    jobType: "Hybrid",
+                    url: "https://linkedin.com/jobs/view/123456",
+                    extractedAt: new Date().toISOString()
+                };
+
+                log('inputData', '📋 LINKEDIN JOB DATA:\n' + JSON.stringify(mockJobData, null, 2));
+
+                // Step 2: Simulate profile data collection
+                log('processingSteps', '👤 STEP 2: Collecting user profile data...');
+                const mockProfileData = {
+                    name: "Nagarjun B J",
+                    designation: "Senior Software Engineer", // This is key!
+                    email: "nagarjun.bj@email.com",
+                    phone: "+91 9876543210",
+                    address: "Bangalore, India",
+                    linkedin: "https://linkedin.com/in/nagarjunbj",
+                    skills: "JavaScript, React, Node.js, Python, Software Development, Team Leadership",
+                    education: "B.Com",
+                    languages: "English, Hindi, Kannada",
+                    workExperience: [
+                        {
+                            id: "1",
+                            designation: "Senior Software Engineer",
+                            company: "Tech Solutions Ltd",
+                            startDate: "2021-01",
+                            endDate: "",
+                            current: true,
+                            description: "Led development of web applications using React and Node.js. Managed a team of 3 developers and implemented CI/CD pipelines."
+                        },
+                        {
+                            id: "2", 
+                            designation: "Software Developer",
+                            company: "StartupXYZ",
+                            startDate: "2019-06",
+                            endDate: "2021-01",
+                            current: false,
+                            description: "Developed full-stack applications using JavaScript technologies. Collaborated with cross-functional teams to deliver quality software."
+                        }
+                    ]
+                };
+
+                log('inputData', '\n👤 USER PROFILE DATA:\n' + JSON.stringify(mockProfileData, null, 2));
+
+                // Step 3: Create request payload
+                log('processingSteps', '📦 STEP 3: Creating request payload...');
+                const requestPayload = {
+                    jobData: mockJobData,
+                    profileData: mockProfileData
+                };
+
+                log('inputData', '\n📦 COMPLETE REQUEST PAYLOAD:\n' + JSON.stringify(requestPayload, null, 2));
+
+                // Step 4: Send to backend
+                log('processingSteps', '🌐 STEP 4: Sending to backend API...');
+                const response = await fetch('http://localhost:4003/api/ai/customize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestPayload)
+                });
+
+                log('processingSteps', `📡 Response Status: ${response.status} ${response.statusText}`);
+
+                if (!response.ok) {
+                    throw new Error(`Backend error: ${response.status}`);
+                }
+
+                // Step 5: Process response
+                log('processingSteps', '📥 STEP 5: Processing AI response...');
+                const result = await response.json();
+                
+                log('aiResponse', '🤖 COMPLETE AI RESPONSE:\n' + JSON.stringify(result, null, 2));
+
+                if (result.success) {
+                    // Step 6: Display final resume
+                    log('processingSteps', '🎨 STEP 6: Displaying customized resume...');
+                    
+                    const finalResumeHtml = result.data.customizedContent;
+                    document.getElementById('finalResume').innerHTML = finalResumeHtml;
+                    
+                    // Show metrics
+                    log('processingSteps', `📊 METRICS:
+- ATS Score: ${result.data.atsScore}%
+- Keywords Matched: ${result.data.keywordsMatched?.length || 0}
+- Keywords Missing: ${result.data.keywordsMissing?.length || 0}
+- Recommendations: ${result.data.recommendations?.length || 0}`);
+
+                    showStatus('✅ Complete AI customization flow test completed successfully!', 'success');
+                } else {
+                    throw new Error(result.error || 'Backend returned error');
+                }
+
+            } catch (error) {
+                log('processingSteps', `❌ ERROR: ${error.message}`);
+                showStatus(`❌ Test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testLinkedInDataExtraction() {
+            showStatus('📋 Testing LinkedIn data extraction...', 'info');
+            document.getElementById('inputData').textContent = '';
+            
+            const mockJobData = {
+                title: "Lead Software Engineer", 
+                company: "Microsoft",
+                location: "Seattle, WA",
+                description: "Join our team as a Lead Software Engineer. You'll architect scalable solutions using C#, .NET, Azure, and mentor junior developers. We need someone with strong leadership skills and 7+ years in enterprise software development.",
+                requirements: ["7+ years experience", "C#/.NET", "Azure", "Leadership", "Mentoring"],
+                skills: ["csharp", "dotnet", "azure", "leadership", "mentoring", "architecture"],
+                experience: "Lead", 
+                jobType: "Remote",
+                url: "https://linkedin.com/jobs/view/789012",
+                extractedAt: new Date().toISOString()
+            };
+
+            log('inputData', '📋 EXTRACTED LINKEDIN JOB DATA:\n' + JSON.stringify(mockJobData, null, 2));
+            showStatus('✅ LinkedIn data extraction simulation complete', 'success');
+        }
+
+        async function testProfileData() {
+            showStatus('👤 Testing profile data collection...', 'info');
+            document.getElementById('inputData').textContent = '';
+            
+            const mockProfileData = {
+                name: "Nagarjun B J",
+                designation: "Senior Software Engineer", // CURRENT DESIGNATION - KEY FIELD!
+                email: "nagarjun.bj@email.com", 
+                phone: "+91 9876543210",
+                address: "Bangalore, India",
+                linkedin: "https://linkedin.com/in/nagarjunbj",
+                skills: "JavaScript, React, Node.js, Python, Software Development, Team Leadership",
+                education: "B.Com",
+                languages: "English (Professional), Hindi (Professional), Kannada (Native)",
+                workExperience: [
+                    {
+                        designation: "Senior Software Engineer",
+                        company: "Tech Solutions Ltd", 
+                        startDate: "2021-01",
+                        endDate: "",
+                        current: true,
+                        description: "Leading web application development using modern JavaScript frameworks."
+                    }
+                ]
+            };
+
+            log('inputData', '👤 USER PROFILE DATA:\n' + JSON.stringify(mockProfileData, null, 2));
+            log('inputData', '\n🎯 KEY FIELD: designation = "' + mockProfileData.designation + '"');
+            log('inputData', 'This designation will be used by AI to bridge current role with target job!');
+            showStatus('✅ Profile data collection simulation complete', 'success');
+        }
+
+        async function testBackendAI() {
+            showStatus('🤖 Testing backend AI response only...', 'info');
+            document.getElementById('aiResponse').textContent = '';
+            
+            try {
+                const testPayload = {
+                    jobData: {
+                        title: "Full Stack Developer",
+                        company: "TechCorp",
+                        description: "Looking for a Full Stack Developer with React and Node.js experience"
+                    },
+                    profileData: {
+                        name: "Test User",
+                        designation: "Software Developer", // Current designation
+                        skills: "JavaScript, React, Node.js"
+                    }
+                };
+
+                const response = await fetch('http://localhost:4003/api/ai/customize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testPayload)
+                });
+
+                const result = await response.json();
+                log('aiResponse', '🤖 BACKEND AI RESPONSE:\n' + JSON.stringify(result, null, 2));
+                
+                if (result.success) {
+                    showStatus('✅ Backend AI test successful', 'success');
+                } else {
+                    showStatus('⚠️ Backend AI returned error: ' + (result.error || 'Unknown'), 'error');
+                }
+            } catch (error) {
+                log('aiResponse', '❌ ERROR: ' + error.message);
+                showStatus('❌ Backend AI test failed', 'error');
+            }
+        }
+
+        // Initialize
+        window.onload = () => {
+            showStatus('🔧 AI Customization Data Flow Test ready. Click a test button to see data flow!', 'success');
+        };
+    </script>
+</body>
+</html>

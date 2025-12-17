@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Storage Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9fafb;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        .btn {
+            background: #2563eb;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            margin: 10px 10px 10px 0;
+            font-weight: 500;
+        }
+        .btn:hover { background: #1d4ed8; }
+        .btn:disabled { background: #9ca3af; cursor: not-allowed; }
+        .btn-danger { background: #dc2626; }
+        .btn-danger:hover { background: #b91c1c; }
+        .experience-item {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+        .experience-item h4 {
+            margin: 0 0 10px 0;
+            color: #2563eb;
+        }
+        .status {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+        }
+        .status.success { background: #d1ecf1; color: #0c5460; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .results {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💾 Profile Storage Test</h1>
+        <p>Test the backend profile storage and work experience management.</p>
+        
+        <div id="status"></div>
+
+        <div class="section">
+            <h3>📝 Profile Information</h3>
+            <div class="form-group">
+                <label>Name:</label>
+                <input type="text" id="name" value="Nagarjun B J">
+            </div>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="email" value="naga.nagarjun@gmail.com">
+            </div>
+            <div class="form-group">
+                <label>Phone:</label>
+                <input type="text" id="phone" value="+91 9535577330">
+            </div>
+            <div class="form-group">
+                <label>Location:</label>
+                <input type="text" id="location" value="Bengaluru, Karnataka, IN">
+            </div>
+            <div class="form-group">
+                <label>Designation:</label>
+                <input type="text" id="designation" value="Managing Director">
+            </div>
+            <div class="form-group">
+                <label>Skills:</label>
+                <textarea id="skills">AI Development, SaaS Solutions, Team Leadership, Operations Management, Software Development</textarea>
+            </div>
+            <div class="form-group">
+                <label>Education:</label>
+                <input type="text" id="education" value="B.com">
+            </div>
+            <div class="form-group">
+                <label>LinkedIn:</label>
+                <input type="url" id="linkedin" value="https://www.linkedin.com/in/nagarjunbhoopalam">
+            </div>
+            
+            <button class="btn" onclick="saveProfile()">💾 Save Profile</button>
+            <button class="btn" onclick="loadProfile()">📂 Load Profile</button>
+        </div>
+
+        <div class="section">
+            <h3>💼 Work Experience</h3>
+            <div id="workExperienceList"></div>
+            
+            <h4>Add New Experience</h4>
+            <div class="form-group">
+                <label>Position:</label>
+                <input type="text" id="newPosition" value="Managing Director">
+            </div>
+            <div class="form-group">
+                <label>Company:</label>
+                <input type="text" id="newCompany" value="site.kuposu.co">
+            </div>
+            <div class="form-group">
+                <label>Location:</label>
+                <input type="text" id="newLocation" value="Bengaluru, Karnataka, India">
+            </div>
+            <div class="form-group">
+                <label>Start Date:</label>
+                <input type="date" id="newStartDate" value="2023-01-01">
+            </div>
+            <div class="form-group">
+                <label>End Date:</label>
+                <input type="date" id="newEndDate">
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="newCurrent" checked> Currently working here
+                </label>
+            </div>
+            <div class="form-group">
+                <label>Description:</label>
+                <textarea id="newDescription">Leading an AI-driven software development company, offering tailored solutions through a dedicated team of expert developers. Specialized in IoT GPS tracking, automation tools, and SaaS development.</textarea>
+            </div>
+            
+            <button class="btn" onclick="addWorkExperience()">➕ Add Experience</button>
+        </div>
+
+        <div class="section">
+            <h3>🤖 Test AI Resume Generation</h3>
+            <p>Test generating a resume using stored profile data:</p>
+            
+            <div class="form-group">
+                <label>Job Title:</label>
+                <input type="text" id="testJobTitle" value="Senior Operations Manager">
+            </div>
+            <div class="form-group">
+                <label>Job Description:</label>
+                <textarea id="testJobDescription">We are looking for a Senior Operations Manager with experience in software development, AI, and team leadership. Must have SaaS experience and operations management skills.</textarea>
+            </div>
+            
+            <button class="btn" onclick="testResumeGeneration()">🚀 Generate Resume from Stored Profile</button>
+            
+            <div id="resumeResults" class="results" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:4003/api';
+        const USER_ID = 'default';
+
+        function showStatus(message, type = 'success') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        async function saveProfile() {
+            const profileData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                location: document.getElementById('location').value,
+                designation: document.getElementById('designation').value,
+                skills: document.getElementById('skills').value,
+                education: document.getElementById('education').value,
+                linkedin: document.getElementById('linkedin').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/profile`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: USER_ID, profileData })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('✅ Profile saved successfully!', 'success');
+                } else {
+                    showStatus('❌ Failed to save profile', 'error');
+                }
+            } catch (error) {
+                showStatus(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadProfile() {
+            try {
+                const response = await fetch(`${API_BASE}/profile?userId=${USER_ID}`);
+                const result = await response.json();
+                
+                if (result.success && result.profile) {
+                    const profile = result.profile;
+                    
+                    document.getElementById('name').value = profile.name || '';
+                    document.getElementById('email').value = profile.email || '';
+                    document.getElementById('phone').value = profile.phone || '';
+                    document.getElementById('location').value = profile.location || '';
+                    document.getElementById('designation').value = profile.designation || '';
+                    document.getElementById('skills').value = profile.skills || '';
+                    document.getElementById('education').value = profile.education || '';
+                    document.getElementById('linkedin').value = profile.linkedin || '';
+                    
+                    displayWorkExperience(profile.workExperience || []);
+                    showStatus('✅ Profile loaded successfully!', 'success');
+                } else {
+                    showStatus('⚠️ No profile found', 'error');
+                }
+            } catch (error) {
+                showStatus(`❌ Error loading profile: ${error.message}`, 'error');
+            }
+        }
+
+        function displayWorkExperience(experiences) {
+            const container = document.getElementById('workExperienceList');
+            
+            if (experiences.length === 0) {
+                container.innerHTML = '<p>No work experience added yet.</p>';
+                return;
+            }
+
+            container.innerHTML = experiences.map(exp => `
+                <div class="experience-item">
+                    <h4>${exp.designation} at ${exp.company}</h4>
+                    <p><strong>Location:</strong> ${exp.location}</p>
+                    <p><strong>Duration:</strong> ${exp.startDate} - ${exp.current ? 'Present' : (exp.endDate || 'End Date')}</p>
+                    <p><strong>Description:</strong> ${exp.description}</p>
+                    <button class="btn btn-danger" onclick="deleteExperience('${exp.id}')">🗑️ Delete</button>
+                </div>
+            `).join('');
+        }
+
+        async function addWorkExperience() {
+            const experience = {
+                designation: document.getElementById('newPosition').value,
+                company: document.getElementById('newCompany').value,
+                location: document.getElementById('newLocation').value,
+                startDate: document.getElementById('newStartDate').value,
+                endDate: document.getElementById('newCurrent').checked ? null : document.getElementById('newEndDate').value,
+                current: document.getElementById('newCurrent').checked,
+                description: document.getElementById('newDescription').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/work-experience`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: USER_ID, experience })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('✅ Work experience added!', 'success');
+                    loadProfile(); // Reload to show updated list
+                    
+                    // Clear form
+                    document.getElementById('newPosition').value = '';
+                    document.getElementById('newCompany').value = '';
+                    document.getElementById('newLocation').value = '';
+                    document.getElementById('newStartDate').value = '';
+                    document.getElementById('newEndDate').value = '';
+                    document.getElementById('newCurrent').checked = false;
+                    document.getElementById('newDescription').value = '';
+                } else {
+                    showStatus('❌ Failed to add experience', 'error');
+                }
+            } catch (error) {
+                showStatus(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function deleteExperience(experienceId) {
+            try {
+                const response = await fetch(`${API_BASE}/work-experience?id=${experienceId}&userId=${USER_ID}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('✅ Experience deleted!', 'success');
+                    loadProfile(); // Reload to show updated list
+                } else {
+                    showStatus('❌ Failed to delete experience', 'error');
+                }
+            } catch (error) {
+                showStatus(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testResumeGeneration() {
+            const resultsDiv = document.getElementById('resumeResults');
+            
+            showStatus('⏳ Generating resume using stored profile...', 'success');
+            
+            const jobData = {
+                title: document.getElementById('testJobTitle').value,
+                company: 'Test Company',
+                description: document.getElementById('testJobDescription').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/ai/customize`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        jobData, 
+                        userId: USER_ID 
+                        // Note: No profileData sent - backend should use stored profile
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('✅ Resume generated using stored profile!', 'success');
+                    
+                    resultsDiv.innerHTML = `
+                        <h4>🎯 Generation Results</h4>
+                        <p><strong>ATS Score:</strong> ${result.data.atsScore}%</p>
+                        <p><strong>Keywords Matched:</strong> ${result.data.keywordsMatched.join(', ')}</p>
+                        <p><strong>Processing:</strong> Used stored profile data automatically</p>
+                        <hr>
+                        <div>${result.data.customizedContent}</div>
+                    `;
+                    resultsDiv.style.display = 'block';
+                } else {
+                    showStatus(`❌ Resume generation failed: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-load profile on page load
+        window.onload = () => {
+            loadProfile();
+        };
+    </script>
+</body>
+</html>

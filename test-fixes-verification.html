@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extension Fixes Verification</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9fafb;
+        }
+        .btn {
+            background: #2563eb;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+            font-weight: 500;
+        }
+        .btn:hover { background: #1d4ed8; }
+        .status {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+        .status.success { background: #d1ecf1; color: #0c5460; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .status.info { background: #fff3cd; color: #856404; }
+        .test-result {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Extension Fixes Verification</h1>
+        <p>Test all the fixes applied to resolve the extension errors.</p>
+        
+        <div id="status"></div>
+        
+        <div class="test-section">
+            <h3>✅ Fix 1: Backend Health Check</h3>
+            <p>Test if backend is running and responsive</p>
+            <button class="btn" onclick="testBackendHealth()">Test Backend Health</button>
+            <div class="test-result" id="backendResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>✅ Fix 2: AI Customization API</h3>
+            <p>Test if AI customization endpoint works with mock data</p>
+            <button class="btn" onclick="testAICustomization()">Test AI Customization</button>
+            <div class="test-result" id="aiResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>✅ Fix 3: Resume Parsing (PDF)</h3>
+            <p>Test if resume parsing no longer throws "pdf is not a function" error</p>
+            <button class="btn" onclick="testResumeParsing()">Test Resume Parsing Endpoint</button>
+            <div class="test-result" id="parseResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>✅ Fix 4: Error Handling</h3>
+            <p>Test improved error messages and handling</p>
+            <button class="btn" onclick="testErrorHandling()">Test Error Handling</button>
+            <div class="test-result" id="errorResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📋 Issues Fixed Summary</h3>
+            <div style="background: #f0f9ff; padding: 15px; border-radius: 6px;">
+                <ul>
+                    <li>✅ <strong>Fixed:</strong> "pdf is not a function" error in resume parsing</li>
+                    <li>✅ <strong>Fixed:</strong> Content Security Policy violations (removed inline onclick handlers)</li>
+                    <li>✅ <strong>Fixed:</strong> "Receiving end does not exist" connection errors with better error handling</li>
+                    <li>✅ <strong>Fixed:</strong> Backend 500 errors with proper validation and timeout handling</li>
+                    <li>✅ <strong>Fixed:</strong> "Failed to fetch" errors with AbortController and better error messages</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function log(elementId, message) {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            element.textContent += `[${timestamp}] ${message}\n`;
+            element.scrollTop = element.scrollHeight;
+        }
+
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        async function testBackendHealth() {
+            log('backendResult', 'Testing backend health...');
+            
+            try {
+                const response = await fetch('http://localhost:4003/health');
+                const data = await response.json();
+                
+                log('backendResult', '✅ Backend Health Response:');
+                log('backendResult', JSON.stringify(data, null, 2));
+                
+                if (response.ok && data.status === 'OK') {
+                    showStatus('✅ Backend health check passed', 'success');
+                } else {
+                    showStatus('⚠️ Backend health check returned unexpected response', 'error');
+                }
+            } catch (error) {
+                log('backendResult', `❌ Error: ${error.message}`);
+                showStatus('❌ Backend health check failed', 'error');
+            }
+        }
+
+        async function testAICustomization() {
+            log('aiResult', 'Testing AI customization endpoint...');
+            
+            const testData = {
+                jobData: {
+                    title: "Senior Full Stack Developer",
+                    company: "Google",
+                    description: "Looking for a Senior Full Stack Developer with React and Node.js experience"
+                },
+                profileData: {
+                    name: "Test User",
+                    designation: "Software Engineer", // This is the key field!
+                    email: "test@example.com",
+                    skills: "JavaScript, React, Node.js, Python",
+                    workExperience: [
+                        {
+                            designation: "Software Engineer",
+                            company: "Tech Corp",
+                            startDate: "2020-01",
+                            endDate: "",
+                            current: true,
+                            description: "Developing web applications using modern frameworks"
+                        }
+                    ]
+                }
+            };
+            
+            try {
+                log('aiResult', 'Sending test data to AI customization endpoint...');
+                log('aiResult', 'Test Data: ' + JSON.stringify(testData, null, 2));
+                
+                const response = await fetch('http://localhost:4003/api/ai/customize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                log('aiResult', `Response Status: ${response.status} ${response.statusText}`);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    log('aiResult', '✅ AI Customization Response:');
+                    log('aiResult', JSON.stringify(result, null, 2));
+                    
+                    if (result.success) {
+                        showStatus('✅ AI customization test passed', 'success');
+                    } else {
+                        showStatus(`⚠️ AI customization returned error: ${result.error}`, 'error');
+                    }
+                } else {
+                    const errorText = await response.text();
+                    log('aiResult', `❌ HTTP ${response.status}: ${errorText}`);
+                    showStatus('❌ AI customization test failed', 'error');
+                }
+            } catch (error) {
+                log('aiResult', `❌ Network Error: ${error.message}`);
+                showStatus('❌ AI customization test failed with network error', 'error');
+            }
+        }
+
+        async function testResumeParsing() {
+            log('parseResult', 'Testing resume parsing endpoint (without actual file)...');
+            
+            try {
+                // Test endpoint accessibility - this should return 400 but not 500
+                const response = await fetch('http://localhost:4003/api/parse-resume', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({}) // Empty data to test endpoint
+                });
+                
+                log('parseResult', `Response Status: ${response.status} ${response.statusText}`);
+                
+                if (response.status === 400) {
+                    log('parseResult', '✅ Endpoint is accessible (returns 400 for invalid data as expected)');
+                    showStatus('✅ Resume parsing endpoint is accessible', 'success');
+                } else if (response.status === 500) {
+                    const errorText = await response.text();
+                    log('parseResult', `❌ Still getting 500 error: ${errorText}`);
+                    showStatus('❌ Resume parsing still has 500 errors', 'error');
+                } else {
+                    log('parseResult', `⚠️ Unexpected status: ${response.status}`);
+                    showStatus('⚠️ Resume parsing returned unexpected status', 'info');
+                }
+            } catch (error) {
+                log('parseResult', `❌ Error: ${error.message}`);
+                showStatus('❌ Resume parsing test failed', 'error');
+            }
+        }
+
+        async function testErrorHandling() {
+            log('errorResult', 'Testing improved error handling...');
+            
+            // Test 1: Invalid endpoint
+            try {
+                log('errorResult', 'Test 1: Calling non-existent endpoint...');
+                const response = await fetch('http://localhost:4003/api/invalid-endpoint');
+                log('errorResult', `Non-existent endpoint returned: ${response.status}`);
+            } catch (error) {
+                log('errorResult', `Non-existent endpoint error: ${error.message}`);
+            }
+            
+            // Test 2: Invalid data to valid endpoint  
+            try {
+                log('errorResult', 'Test 2: Sending invalid data to AI endpoint...');
+                const response = await fetch('http://localhost:4003/api/ai/customize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ invalid: 'data' })
+                });
+                
+                const result = await response.json();
+                log('errorResult', `Invalid data response: ${JSON.stringify(result, null, 2)}`);
+                
+                if (!result.success && result.error) {
+                    log('errorResult', '✅ Error handling working - returns structured error response');
+                    showStatus('✅ Error handling improvements are working', 'success');
+                } else {
+                    log('errorResult', '⚠️ Error handling might need improvement');
+                    showStatus('⚠️ Error handling could be better', 'info');
+                }
+            } catch (error) {
+                log('errorResult', `Invalid data test error: ${error.message}`);
+                showStatus('❌ Error handling test failed', 'error');
+            }
+        }
+
+        // Initialize
+        window.onload = () => {
+            showStatus('🔧 Extension fixes verification ready. Click buttons to test individual fixes!', 'success');
+        };
+    </script>
+</body>
+</html>

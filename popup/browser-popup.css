@@ -1,0 +1,34 @@
+/* Browser Extension specific overrides */
+/* This file overrides desktop-specific styles for browser usage */
+
+body {
+  width: 400px !important;
+  min-height: 600px !important;
+  max-height: 600px !important;
+  height: auto !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
+
+.container {
+  height: 100% !important;
+  max-height: 600px !important;
+  min-height: 600px !important;
+  overflow-y: auto !important;
+}
+
+/* Hide desktop-specific elements in browser */
+.coin-balance {
+  /* Keep coin balance visible in browser too */
+}
+
+/* Ensure proper scrolling in browser popup */
+.tab-content {
+  max-height: calc(600px - 120px) !important;
+  overflow-y: auto !important;
+}
+
+.tab-content.active {
+  display: block !important;
+}

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug History Frontend</title>
+</head>
+<body>
+    <h1>Debug History API</h1>
+    <button onclick="testLogin()">1. Test Login</button>
+    <button onclick="testHistory()">2. Test History</button>
+    <div id="results" style="margin-top: 20px; padding: 10px; background: #f0f0f0;"></div>
+
+    <script>
+        let authToken = null;
+        
+        async function testLogin() {
+            try {
+                const response = await fetch('http://localhost:4003/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'nagarjunbhoopalam@gmail.com',
+                        password: 'test123456'
+                    })
+                });
+                
+                const result = await response.json();
+                authToken = result.token;
+                
+                document.getElementById('results').innerHTML = `
+                    <h3>Login Result:</h3>
+                    <p>Success: ${result.success}</p>
+                    <p>Token: ${authToken ? 'Received' : 'Missing'}</p>
+                    <p>User ID: ${result.user ? result.user.id : 'Missing'}</p>
+                `;
+                
+                console.log('Login result:', result);
+            } catch (error) {
+                console.error('Login error:', error);
+                document.getElementById('results').innerHTML = `<p style="color: red;">Login Error: ${error.message}</p>`;
+            }
+        }
+        
+        async function testHistory() {
+            if (!authToken) {
+                alert('Please test login first');
+                return;
+            }
+            
+            try {
+                console.log('Making history request with token:', authToken);
+                
+                const response = await fetch('http://localhost:4003/api/customization-history', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log('History response status:', response.status);
+                console.log('History response ok:', response.ok);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('History data:', data);
+                    
+                    document.getElementById('results').innerHTML = `
+                        <h3>History Result:</h3>
+                        <p>Success: ${data.success}</p>
+                        <p>History count: ${data.history ? data.history.length : 'undefined'}</p>
+                        <div style="margin-top: 10px;">
+                            <h4>History Items:</h4>
+                            ${data.history && data.history.length > 0 ? 
+                                data.history.map((item, index) => 
+                                    `<p>${index + 1}. ${item.jobTitle} at ${item.company} (${item.atsScore}%)</p>`
+                                ).join('') : 
+                                '<p>No history items found</p>'
+                            }
+                        </div>
+                        <pre style="background: #eee; padding: 10px; font-size: 12px; overflow: auto; max-height: 200px;">${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    const errorText = await response.text();
+                    console.error('History API error:', errorText);
+                    document.getElementById('results').innerHTML = `<p style="color: red;">History API Error: ${response.status} - ${errorText}</p>`;
+                }
+            } catch (error) {
+                console.error('History error:', error);
+                document.getElementById('results').innerHTML = `<p style="color: red;">History Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KUPOSU AI Resume Maker</title>
+    <link rel="stylesheet" href="popup.css">
+    <!-- Razorpay Checkout Script -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <!-- Browser extension specific styles -->
+    <style id="browser-styles">
+        /* Auto-detect and apply browser-specific styles */
+        @media (max-height: 700px) {
+            body {
+                min-height: 600px !important;
+                max-height: 600px !important;
+                height: auto !important;
+                border-radius: 12px !important;
+                box-shadow: none !important;
+            }
+            .container {
+                height: 100% !important;
+                max-height: 600px !important;
+                min-height: 600px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>KUPOSU AI</h1>
+            <div class="header-actions">
+                <div class="coin-balance" id="coinBalance" style="display: none;" title="Click to view transactions">
+                    <span class="coin-icon">🪙</span>
+                    <span class="coin-amount" id="coinAmount">0</span>
+                </div>
+                <button class="history-btn" id="historyBtn" title="View customization history">H</button>
+                <button class="version-btn" id="versionBtn" title="View version history">V</button>
+                <div class="status-indicator" id="statusIndicator">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Ready</span>
+                </div>
+            </div>
+        </header>
+
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-tab="auth">Account</button>
+            <button class="tab-btn" data-tab="profile">Profile</button>
+            <button class="tab-btn" data-tab="resume">Resume</button>
+            <button class="tab-btn" data-tab="customize">Customize</button>
+            <button class="tab-btn" data-tab="versions">Versions</button>
+        </nav>
+
+        <!-- Account Tab -->
+        <div class="tab-content active" id="auth">
+            <div class="auth-container">
+                <!-- Login Form -->
+                <div class="auth-form" id="loginForm">
+                    <h3>Welcome Back!</h3>
+                    <p class="text-muted">Sign in to access your KUPOSU AI Resume Maker</p>
+                    
+                    <form class="form" id="loginFormElement">
+                        <div class="form-group">
+                            <label for="loginEmail">Email Address</label>
+                            <input type="email" id="loginEmail" placeholder="your.email@example.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">Password</label>
+                            <div class="password-input-container">
+                                <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                                <button type="button" class="password-toggle-btn" data-target="loginPassword" title="Show password">
+                                    <span class="eye-icon">👁️</span>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Sign In</button>
+                    </form>
+                    
+                    <div class="auth-links">
+                        <p><a href="#" id="showSignupForm">Don't have an account? Sign up</a></p>
+                        <p><a href="#" id="showForgotPassword">Forgot your password?</a></p>
+                    </div>
+                </div>
+                
+                <!-- Signup Form -->
+                <div class="auth-form" id="signupForm" style="display: none;">
+                    <h3>Create Account</h3>
+                    <p class="text-muted">Join thousands optimizing their resumes with KUPOSU AI</p>
+                    
+                    <form class="form" id="signupFormElement">
+                        <div class="form-group">
+                            <label for="signupName">Full Name</label>
+                            <input type="text" id="signupName" placeholder="Your full name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="signupEmail">Email Address</label>
+                            <input type="email" id="signupEmail" placeholder="your.email@example.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="signupPassword">Password</label>
+                            <div class="password-input-container">
+                                <input type="password" id="signupPassword" placeholder="Create a password (min 6 characters)" required minlength="6">
+                                <button type="button" class="password-toggle-btn" data-target="signupPassword" title="Show password">
+                                    <span class="eye-icon">👁️</span>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Create Account</button>
+                    </form>
+                    
+                    <div class="auth-links">
+                        <p><a href="#" id="showLoginForm">Already have an account? Sign in</a></p>
+                    </div>
+                </div>
+                
+                <!-- Forgot Password Form -->
+                <div class="auth-form" id="forgotPasswordForm" style="display: none;">
+                    <h3>Reset Password</h3>
+                    <p class="text-muted">Enter your email to receive a password reset link</p>
+                    
+                    <form class="form" id="forgotPasswordFormElement">
+                        <div class="form-group">
+                            <label for="forgotEmail">Email Address</label>
+                            <input type="email" id="forgotEmail" placeholder="your.email@example.com" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send Reset Link</button>
+                    </form>
+                    
+                    <div class="auth-links">
+                        <p><a href="#" id="backToLogin">Back to Sign In</a></p>
+                    </div>
+                </div>
+                
+                <!-- Logged In State -->
+                <div class="auth-form" id="loggedInState" style="display: none;">
+                    <div class="user-info">
+                        <h3>Welcome back!</h3>
+                        <p id="userEmail" class="text-muted"></p>
+                        <p id="lastLogin" class="text-muted"></p>
+                    </div>
+                    
+                    <div class="user-actions">
+                        <button class="btn btn-secondary" id="logoutBtn">Sign Out</button>
+                    </div>
+                </div>
+
+                <!-- Coin Management Section -->
+                <div class="coin-management" id="coinManagement" style="display: none;">
+                    <h3>💰 Coin Management</h3>
+                    <div class="coin-info">
+                        <p>Each AI resume customization costs <strong>10 coins</strong></p>
+                        <div class="current-balance">
+                            <span>Current Balance: </span>
+                            <span class="balance-amount" id="accountCoinBalance">0</span>
+                            <span> 🪙</span>
+                        </div>
+                    </div>
+                    
+                    <div class="recharge-section">
+                        <h4>Recharge Coins</h4>
+                        <div class="recharge-options">
+                            <button class="recharge-btn" data-amount="100" data-price="₹200">
+                                100 coins - ₹200
+                            </button>
+                            <button class="recharge-btn" data-amount="250" data-price="₹500">
+                                250 coins - ₹500
+                            </button>
+                            <button class="recharge-btn" data-amount="500" data-price="₹1000">
+                                500 coins - ₹1000
+                            </button>
+                        </div>
+                        
+                        <div class="custom-recharge">
+                            <h5>Custom Amount</h5>
+                            <div class="form-group">
+                                <input type="number" id="customCoinAmount" placeholder="Enter amount" min="1" max="10000">
+                                <button class="btn btn-primary" id="customRechargeBtn">Add Coins</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="transaction-history">
+                        <h4>Recent Transactions</h4>
+                        <button class="btn btn-secondary" id="viewTransactionsBtn">View Full History</button>
+                        <div id="recentTransactions" class="transactions-list">
+                            <!-- Recent transactions will be displayed here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Status Messages -->
+                <div id="authMessage" class="auth-message" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Profile Tab -->
+        <div class="tab-content" id="profile">
+            <div class="section">
+                <h3>Personal Information</h3>
+                <form id="profileForm" class="form">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" placeholder="Enter your full name">
+                    </div>
+                    <div class="form-group">
+                        <label for="designation">Designation</label>
+                        <input type="text" id="designation" placeholder="e.g. Software Engineer">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email ID</label>
+                        <input type="email" id="email" placeholder="your.email@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" placeholder="+1 (555) 123-4567">
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <textarea id="address" placeholder="Your full address"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="linkedin">LinkedIn Profile URL</label>
+                        <input type="url" id="linkedin" placeholder="https://linkedin.com/in/yourprofile">
+                    </div>
+                </form>
+            </div>
+
+            <div class="section">
+                <h3>Work Experience</h3>
+                <div id="workExperiences">
+                    <!-- Work experiences will be added dynamically -->
+                </div>
+                <button class="btn btn-secondary" id="addExperience">+ Add Experience</button>
+            </div>
+
+            <div class="section">
+                <h3>Additional Information</h3>
+                <div class="form-group">
+                    <label for="skills">Core Skills</label>
+                    <textarea id="skills" placeholder="JavaScript, Python, React, etc. (comma separated)"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="education">Education</label>
+                    <textarea id="education" placeholder="Your educational background"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="languages">Languages</label>
+                    <textarea id="languages" placeholder="English, Spanish, etc. (comma separated)"></textarea>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Professional Certificates</h3>
+                <div id="certificates">
+                    <!-- Certificates will be added dynamically -->
+                </div>
+                <button class="btn btn-secondary" id="addCertificate">+ Add Certificate</button>
+            </div>
+
+            <div class="section">
+                <button class="btn btn-primary" id="saveProfile">Save Profile</button>
+            </div>
+        </div>
+
+        <!-- Resume Tab -->
+        <div class="tab-content" id="resume">
+            <div class="section">
+                <h3>Upload Resume</h3>
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-placeholder">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7,10 12,15 17,10"/>
+                            <line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        <p>Drop your resume here or click to browse</p>
+                        <p class="file-types">Supports PDF and DOC files</p>
+                    </div>
+                    <input type="file" id="resumeFile" accept=".pdf,.doc,.docx" hidden>
+                </div>
+                <div class="uploaded-file" id="uploadedFile" style="display: none;">
+                    <div class="file-info">
+                        <span class="file-name"></span>
+                        <button class="btn-remove" id="removeFile">×</button>
+                    </div>
+                    <button class="btn btn-secondary" id="parseResume">Parse Resume</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Reference CV Template</h3>
+                <p class="text-muted">Upload a reference CV to match the layout and styling</p>
+                <button class="btn btn-secondary" id="uploadReference">Upload Reference CV</button>
+                <input type="file" id="referenceFile" accept=".pdf,.doc,.docx" hidden>
+            </div>
+        </div>
+
+        <!-- Customize Tab -->
+        <div class="tab-content" id="customize">
+            <div class="section">
+                <div class="linkedin-detector" id="linkedinDetector">
+                    <h3>LinkedIn Job Detection</h3>
+                    <div class="detection-status" id="detectionStatus">
+                        <span class="status-icon">⚠️</span>
+                        <span class="status-message">Please navigate to a LinkedIn job posting</span>
+                    </div>
+                    <button class="btn btn-primary" id="analyzeJob" disabled>Analyze Job & Customize Resume</button>
+                </div>
+                
+                <!-- Loading Spinner -->
+                <div class="loading-container" id="loadingContainer" style="display: none;">
+                    <div class="loading-spinner">
+                        <div class="spinner-ring">
+                            <div class="spinner-progress" id="spinnerProgress"></div>
+                        </div>
+                        <div class="loading-text">
+                            <span id="loadingText">Analyzing job posting...</span>
+                            <span id="loadingPercentage">0%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section" id="customizationResults" style="display: none;">
+                <h3>Customization Results</h3>
+                <div class="ats-score">
+                    <h4>ATS Match Score</h4>
+                    <div class="score-display">
+                        <div class="score-circle" id="scoreCircle">
+                            <span class="score-value" id="scoreValue">0%</span>
+                        </div>
+                        <div class="score-details">
+                            <p>Keywords matched: <span id="keywordCount">0</span></p>
+                            <p>Missing keywords: <span id="missingCount">0</span></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="customized-resume">
+                    <h4>Customized Resume Preview</h4>
+                    <div class="resume-preview" id="resumePreview">
+                        <!-- Resume content will be generated here -->
+                    </div>
+                    <div class="download-options">
+                        <button class="btn btn-primary" id="downloadPDF">Download PDF</button>
+                        <button class="btn btn-secondary" id="downloadDOC">Download DOC</button>
+                        <button class="btn btn-secondary" id="editResume">Edit Resume</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Versions Tab -->
+        <div class="tab-content" id="versions">
+            <div class="section">
+                <h3>Resume Versions</h3>
+                <div class="versions-list" id="versionsList">
+                    <!-- Version history will be displayed here -->
+                </div>
+                <button class="btn btn-secondary" id="createVersion">+ Save Current as New Version</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Version History Modal -->
+    <div class="modal-overlay" id="versionModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>📋 Software Version History</h3>
+                <button class="modal-close" id="closeVersionModal">×</button>
+            </div>
+            <div class="modal-content">
+                <div class="version-info">
+                    <div class="current-version">
+                        <span class="version-badge current">v1.0.0</span>
+                        <span class="version-status">Current Version</span>
+                    </div>
+                </div>
+                
+                <div class="version-history">
+                    <div class="version-item">
+                        <div class="version-header">
+                            <span class="version-number">v1.0.0</span>
+                            <span class="version-date">December 13, 2024</span>
+                            <span class="version-type stable">Stable Release</span>
+                        </div>
+                        <div class="version-description">
+                            <h4>🎉 Initial Release - KUPOSU AI Resume Maker</h4>
+                            <ul>
+                                <li>✅ LinkedIn job posting detection and data extraction</li>
+                                <li>✅ AI-powered resume customization (OpenAI/Gemini integration)</li>
+                                <li>✅ ATS score calculation and keyword matching</li>
+                                <li>✅ Professional resume templates and PDF/DOC export</li>
+                                <li>✅ User profile management with work experience tracking</li>
+                                <li>✅ Resume version control and management</li>
+                                <li>✅ Chrome Web Store compliant extension</li>
+                                <li>✅ Responsive UI with modern design</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="version-item">
+                        <div class="version-header">
+                            <span class="version-number">v0.9.0</span>
+                            <span class="version-date">December 12, 2024</span>
+                            <span class="version-type beta">Beta Release</span>
+                        </div>
+                        <div class="version-description">
+                            <h4>🧪 Beta Testing Phase</h4>
+                            <ul>
+                                <li>🔧 Core extension framework development</li>
+                                <li>🔧 LinkedIn content script integration</li>
+                                <li>🔧 Backend API development</li>
+                                <li>🔧 AI service integration testing</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="version-item">
+                        <div class="version-header">
+                            <span class="version-number">v0.5.0</span>
+                            <span class="version-date">December 11, 2024</span>
+                            <span class="version-type alpha">Alpha Release</span>
+                        </div>
+                        <div class="version-description">
+                            <h4>🚀 Initial Development</h4>
+                            <ul>
+                                <li>🏗️ Project architecture and planning</li>
+                                <li>🏗️ Chrome extension manifest setup</li>
+                                <li>🏗️ UI/UX design and prototyping</li>
+                                <li>🏗️ Backend service architecture</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="version-footer">
+                    <div class="tech-stack">
+                        <h4>🛠️ Technology Stack</h4>
+                        <div class="tech-tags">
+                            <span class="tech-tag">Chrome Extension Manifest v3</span>
+                            <span class="tech-tag">JavaScript ES6+</span>
+                            <span class="tech-tag">Node.js Backend</span>
+                            <span class="tech-tag">OpenAI API</span>
+                            <span class="tech-tag">Google Gemini</span>
+                            <span class="tech-tag">PDF Generation</span>
+                            <span class="tech-tag">LinkedIn Integration</span>
+                        </div>
+                    </div>
+                    
+                    <div class="project-info">
+                        <p><strong>🎯 Mission:</strong> Help job seekers optimize their resumes for better ATS compatibility and job matching success.</p>
+                        <p><strong>📊 Features:</strong> AI-powered customization, real-time scoring, professional templates, and seamless LinkedIn integration.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Customization History Modal -->
+    <div class="modal-overlay" id="historyModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>📄 AI Customization History</h3>
+                <button class="modal-close" id="closeHistoryModal">×</button>
+            </div>
+            <div class="modal-content">
+                <div class="history-list" id="historyList">
+                    <!-- History items will be populated here -->
+                </div>
+                
+                <div class="history-footer">
+                    <p class="text-muted">Download your AI-customized resumes in PDF or DOC format</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

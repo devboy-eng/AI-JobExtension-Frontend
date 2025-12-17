@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Icon Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .icon-preview { display: inline-block; margin: 10px; text-align: center; }
+        canvas { border: 1px solid #ddd; background: white; }
+    </style>
+</head>
+<body>
+    <h1>Chrome Extension Icon Generator</h1>
+    <p>This generates placeholder icons. Replace with your actual design.</p>
+    
+    <div id="icons"></div>
+    
+    <script>
+        const sizes = [16, 32, 48, 128];
+        const iconsContainer = document.getElementById('icons');
+        
+        sizes.forEach(size => {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Create gradient background
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#2563eb');
+            gradient.addColorStop(1, '#1d4ed8');
+            
+            // Fill background
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Add text
+            ctx.fillStyle = 'white';
+            ctx.font = `bold ${size * 0.3}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('AI', size / 2, size / 2);
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.href = canvas.toDataURL();
+            link.download = `icon${size}.png`;
+            link.textContent = `Download ${size}x${size}`;
+            
+            const preview = document.createElement('div');
+            preview.className = 'icon-preview';
+            preview.appendChild(canvas);
+            preview.appendChild(document.createElement('br'));
+            preview.appendChild(link);
+            
+            iconsContainer.appendChild(preview);
+        });
+    </script>
+</body>
+</html>

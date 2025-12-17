@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Specific LinkedIn Job - Operations Role</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        h1 { color: #2563eb; }
+        .job-url {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            margin: 20px 0;
+            word-break: break-all;
+        }
+        .test-steps {
+            background: #eff6ff;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #bfdbfe;
+            margin: 20px 0;
+        }
+        .btn {
+            display: inline-block;
+            background: #2563eb;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            margin: 10px 10px 10px 0;
+            font-weight: 500;
+        }
+        .btn:hover { background: #1d4ed8; }
+        .code {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Monaco', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .success { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Test LinkedIn Job Analysis</h1>
+        
+        <div class="job-url">
+            <strong>Target Job URL:</strong><br>
+            https://www.linkedin.com/jobs/search/?currentJobId=4334049262&geoId=102713980&keywords=operations&origin=JOB_SEARCH_PAGE_SEARCH_BUTTON&refresh=true
+        </div>
+
+        <div class="test-steps">
+            <h3>🔧 Fix Steps for Job Analysis</h3>
+            <ol>
+                <li><strong>Navigate to the LinkedIn job page above</strong></li>
+                <li><strong>Wait for page to fully load</strong> (see job description)</li>
+                <li><strong>Open Chrome DevTools</strong> (F12 → Console)</li>
+                <li><strong>Run the enhanced debug script</strong> (copy from buttons below)</li>
+                <li><strong>Check extension functionality</strong></li>
+            </ol>
+        </div>
+
+        <h2>🧪 Debug Scripts</h2>
+
+        <h3>1. Enhanced LinkedIn Fix Script</h3>
+        <button onclick="copyScript('linkedinFix')" class="btn">📋 Copy LinkedIn Fix Script</button>
+        
+        <div class="code" id="linkedinFixScript" style="display: none;">
+// Enhanced LinkedIn Job Analysis Fix
+fetch('http://localhost:4002/linkedin-fix.js')
+  .then(r => r.text())
+  .then(eval)
+  .catch(err => {
+    console.error('Could not load fix script:', err);
+    // Fallback: manual extraction test
+    console.log('=== MANUAL EXTRACTION TEST ===');
+    console.log('URL:', window.location.href);
+    console.log('Job ID:', window.location.href.match(/currentJobId=(\d+)/)?.[1] || 'Not found');
+    console.log('H1 elements:', document.querySelectorAll('h1').length);
+    console.log('Description elements:', document.querySelectorAll('[class*="description"]').length);
+  });
+        </div>
+
+        <h3>2. Extension Status Check</h3>
+        <button onclick="copyScript('statusCheck')" class="btn">🔍 Copy Status Check</button>
+        
+        <div class="code" id="statusCheckScript" style="display: none;">
+// Extension Status Check
+console.log('=== EXTENSION STATUS CHECK ===');
+console.log('Extension button present:', !!document.getElementById('ai-resume-analysis-btn'));
+console.log('LinkedIn job page:', window.location.href.includes('linkedin.com/jobs'));
+console.log('Job ID present:', window.location.href.includes('currentJobId='));
+
+// Check if content script loaded
+if (document.getElementById('ai-resume-analysis-btn')) {
+  console.log('✅ Extension content script loaded successfully');
+} else {
+  console.log('❌ Extension content script not loaded');
+  console.log('💡 Go to chrome://extensions/ and reload the extension');
+}
+
+// Test backend connection
+fetch('http://localhost:4003/health')
+  .then(r => r.json())
+  .then(data => console.log('✅ Backend status:', data.status))
+  .catch(err => console.log('❌ Backend not accessible:', err.message));
+        </div>
+
+        <h3>3. Force Extension Analysis</h3>
+        <button onclick="copyScript('forceAnalysis')" class="btn">⚡ Copy Force Analysis</button>
+        
+        <div class="code" id="forceAnalysisScript" style="display: none;">
+// Force Extension Analysis
+console.log('=== FORCE EXTENSION ANALYSIS ===');
+
+// Check if extension button exists
+const button = document.getElementById('ai-resume-analysis-btn');
+if (button) {
+  console.log('✅ Extension button found');
+  console.log('🚀 Triggering analysis...');
+  
+  // Click the button to trigger analysis
+  button.click();
+  
+  console.log('📊 Check the extension popup for results');
+  console.log('💡 If it fails, check the console for error messages');
+} else {
+  console.log('❌ Extension button not found');
+  console.log('🔧 Troubleshooting steps:');
+  console.log('   1. Make sure you are on the LinkedIn job page');
+  console.log('   2. Reload the extension in chrome://extensions/');
+  console.log('   3. Refresh this LinkedIn page');
+  console.log('   4. Wait 5-10 seconds for content script to load');
+}
+        </div>
+
+        <h2>🔄 Reload Extension</h2>
+        
+        <div class="warning">
+            <strong>⚠️ Important:</strong> After making changes to the extension code, you need to reload it:
+            <ol>
+                <li>Go to <code>chrome://extensions/</code></li>
+                <li>Find your "AI Resume Customizer" extension</li>
+                <li>Click the "Reload" button (circular arrow icon)</li>
+                <li>Refresh the LinkedIn job page</li>
+                <li>Test the extension again</li>
+            </ol>
+        </div>
+
+        <h2>✅ Expected Results</h2>
+        
+        <div class="success">
+            <strong>When working correctly, you should see:</strong>
+            <ul>
+                <li>✅ Extension shows "LinkedIn job posting detected"</li>
+                <li>✅ "Analyze Job & Customize Resume" button is enabled</li>
+                <li>✅ Click button → shows "Analyzing job posting..."</li>
+                <li>✅ Results appear with ATS score and recommendations</li>
+                <li>✅ Console shows extracted job data (title, company, description)</li>
+            </ul>
+        </div>
+
+        <h2>🛠️ Backend Status</h2>
+        <button onclick="testBackend()" class="btn">🧪 Test Backend</button>
+        <div id="backendStatus"></div>
+
+        <h2>📊 Manual Job Data Extraction</h2>
+        <button onclick="testJobExtraction()" class="btn">🔍 Test Job Extraction</button>
+        <div id="extractionResults"></div>
+    </div>
+
+    <script>
+        function copyScript(scriptType) {
+            let script = '';
+            
+            const scripts = {
+                linkedinFix: document.getElementById('linkedinFixScript').textContent,
+                statusCheck: document.getElementById('statusCheckScript').textContent,
+                forceAnalysis: document.getElementById('forceAnalysisScript').textContent
+            };
+            
+            script = scripts[scriptType];
+            
+            navigator.clipboard.writeText(script).then(() => {
+                alert('Script copied! Now:\n1. Go to the LinkedIn job page\n2. Open Chrome DevTools (F12)\n3. Go to Console tab\n4. Paste and press Enter');
+            });
+        }
+
+        async function testBackend() {
+            const statusDiv = document.getElementById('backendStatus');
+            statusDiv.innerHTML = '<div class="status warning">⏳ Testing backend connection...</div>';
+            
+            try {
+                const response = await fetch('http://localhost:4003/health');
+                const data = await response.json();
+                
+                statusDiv.innerHTML = `
+                    <div class="status success">
+                        ✅ Backend is running successfully!<br>
+                        Status: ${data.status}<br>
+                        Features: ${data.features.join(', ')}<br>
+                        URL: http://localhost:4003
+                    </div>
+                `;
+            } catch (error) {
+                statusDiv.innerHTML = `
+                    <div class="status error">
+                        ❌ Backend connection failed!<br>
+                        Error: ${error.message}<br>
+                        <strong>Fix:</strong> Run <code>PORT=4003 node start-backend.js</code> in terminal
+                    </div>
+                `;
+            }
+        }
+
+        function testJobExtraction() {
+            const resultsDiv = document.getElementById('extractionResults');
+            
+            resultsDiv.innerHTML = `
+                <div class="status warning">
+                    ⚠️ This test only works when run on the LinkedIn job page.<br>
+                    <strong>Instructions:</strong><br>
+                    1. Navigate to: <br>
+                    <code>https://www.linkedin.com/jobs/search/?currentJobId=4334049262...</code><br>
+                    2. Open Chrome DevTools (F12) → Console<br>
+                    3. Copy and run the "LinkedIn Fix Script" above<br>
+                    4. Check the console output for extracted data
+                </div>
+            `;
+        }
+
+        // Auto-test backend on page load
+        window.onload = () => {
+            setTimeout(testBackend, 1000);
+        };
+    </script>
+</body>
+</html>
