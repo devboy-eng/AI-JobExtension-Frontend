@@ -719,11 +719,16 @@ class ResumeCustomizer {
     }
 
     detectJobPlatform(url) {
+        console.log('🔍 Detecting job platform for URL:', url);
+        
         if (url.includes('linkedin.com/jobs')) {
+            console.log('✅ LinkedIn job page detected');
             return { name: 'LinkedIn', detected: true };
-        } else if (url.includes('naukri.com/job-listings-')) {
+        } else if (url.includes('naukri.com') && (url.includes('job-listings-') || url.includes('jobdetail-'))) {
+            console.log('✅ Naukri job page detected');
             return { name: 'Naukri', detected: true };
         } else {
+            console.log('❌ No supported job platform detected');
             return { name: null, detected: false };
         }
     }

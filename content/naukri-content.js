@@ -1,34 +1,357 @@
 // Content script for Naukri.com job page detection and data extraction
+console.log('🚀 NAUKRI CONTENT SCRIPT LOADED!', window.location.href);
+
+// SMART BUTTON INJECTION - Inside job description area
+function injectButtonImmediately() {
+    console.log('🚀 SMART BUTTON INJECTION ATTEMPT');
+    
+    // Remove any existing button first
+    const existing = document.getElementById('ai-resume-analysis-btn-naukri');
+    if (existing) existing.remove();
+    
+    // Target the "Job description" heading specifically
+    const headingSelectors = [
+        'h2:contains("Job description")',
+        'h2:contains("job description")', 
+        'h1:contains("Job description")',
+        'h1:contains("job description")',
+        'h3:contains("Job description")',
+        'h3:contains("job description")'
+    ];
+    
+    // Since CSS :contains() doesn't work in querySelectorAll, we'll find it manually
+    let jobDescriptionHeading = null;
+    
+    // Find all h1, h2, h3 elements and check their text content
+    const allHeadings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    for (const heading of allHeadings) {
+        const text = heading.textContent.trim().toLowerCase();
+        if (text === 'job description' || text.includes('job description')) {
+            jobDescriptionHeading = heading;
+            console.log('✅ Found "Job description" heading:', heading);
+            break;
+        }
+    }
+    
+    // Fallback selectors for job description containers if heading not found
+    const fallbackSelectors = [
+        '.jobDescStyle',
+        '.job-description', 
+        '.jd-description',
+        '.jobDesc',
+        '.jdDet',
+        '.job-details',
+        '.job-desc'
+    ];
+    
+    let targetContainer = null;
+    let selectedSelector = '';
+    
+    // First try to use the Job Description heading
+    if (jobDescriptionHeading) {
+        targetContainer = jobDescriptionHeading;
+        selectedSelector = 'Job description heading';
+        console.log('✅ Using Job Description heading as target');
+    } else {
+        // Fallback to finding description containers
+        for (const selector of fallbackSelectors) {
+            const elements = document.querySelectorAll(selector);
+            console.log(`🔍 Checking fallback selector: ${selector} (found ${elements.length} elements)`);
+            
+            if (elements.length > 0) {
+                for (const element of elements) {
+                    const rect = element.getBoundingClientRect();
+                    if (rect.height > 100 && rect.width > 300) {
+                        targetContainer = element;
+                        selectedSelector = selector;
+                        console.log(`✅ Selected fallback container: ${selector}`);
+                        break;
+                    }
+                }
+                if (targetContainer) break;
+            }
+        }
+    }
+    
+    const button = document.createElement('div');
+    button.id = 'ai-resume-analysis-btn-naukri';
+    button.innerHTML = '🤖 Customize Resume with AI';
+    
+    if (targetContainer) {
+        if (selectedSelector === 'Job description heading') {
+            // HEADING PLACEMENT - Next to the "Job description" h2 heading
+            console.log('📍 Placing button next to Job Description heading');
+            
+            button.style.cssText = `
+                background: #4285f4 !important;
+                color: white !important;
+                padding: 8px 16px !important;
+                border-radius: 6px !important;
+                box-shadow: 0 2px 8px rgba(66, 133, 244, 0.3) !important;
+                font-size: 13px !important;
+                font-weight: 500 !important;
+                cursor: pointer !important;
+                border: none !important;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+                display: inline-block !important;
+                text-align: center !important;
+                transition: all 0.2s ease !important;
+                min-width: 180px !important;
+                max-width: 220px !important;
+                margin-left: 20px !important;
+                vertical-align: middle !important;
+                white-space: nowrap !important;
+            `;
+            
+            // Insert button right after the heading text, on the same line
+            targetContainer.style.display = 'flex';
+            targetContainer.style.alignItems = 'center';
+            targetContainer.style.justifyContent = 'space-between';
+            targetContainer.appendChild(button);
+            
+            console.log('✅ Button placed next to Job Description heading');
+        } else {
+            // FALLBACK PLACEMENT - Inside content area
+            console.log('📍 Placing button in fallback content area');
+            
+            const buttonWrapper = document.createElement('div');
+            buttonWrapper.style.cssText = `
+                display: flex !important;
+                justify-content: flex-end !important;
+                margin: 10px 0 !important;
+                padding: 0 !important;
+            `;
+            
+            button.style.cssText = `
+                background: #4285f4 !important;
+                color: white !important;
+                padding: 10px 16px !important;
+                border-radius: 6px !important;
+                box-shadow: 0 2px 8px rgba(66, 133, 244, 0.3) !important;
+                font-size: 13px !important;
+                font-weight: 500 !important;
+                cursor: pointer !important;
+                border: none !important;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+                display: inline-block !important;
+                text-align: center !important;
+                transition: all 0.2s ease !important;
+                min-width: 180px !important;
+                max-width: 220px !important;
+                white-space: nowrap !important;
+            `;
+            
+            buttonWrapper.appendChild(button);
+            
+            if (targetContainer.firstChild) {
+                targetContainer.insertBefore(buttonWrapper, targetContainer.firstChild);
+            } else {
+                targetContainer.appendChild(buttonWrapper);
+            }
+            
+            console.log('✅ Button placed in fallback content area');
+        }
+    } else {
+        // FALLBACK - Fixed position if no suitable container found
+        console.log('🚨 No suitable container found, using fallback position');
+        
+        button.style.cssText = `
+            position: fixed !important;
+            top: 80px !important;
+            right: 20px !important;
+            z-index: 999999 !important;
+            background: #4285f4 !important;
+            color: white !important;
+            padding: 12px 16px !important;
+            border-radius: 8px !important;
+            box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3) !important;
+            font-size: 14px !important;
+            font-weight: 500 !important;
+            cursor: pointer !important;
+            min-width: 220px !important;
+            text-align: center !important;
+            font-family: Arial, sans-serif !important;
+            display: block !important;
+        `;
+        
+        document.body.appendChild(button);
+        console.log('⚠️ Button placed in fallback fixed position');
+    }
+    
+    // Add hover effects
+    button.addEventListener('mouseover', () => {
+        button.style.background = '#3367d6';
+        button.style.transform = 'translateY(-1px)';
+        button.style.boxShadow = '0 4px 12px rgba(66, 133, 244, 0.4)';
+    });
+    
+    button.addEventListener('mouseout', () => {
+        button.style.background = '#4285f4';
+        button.style.transform = 'translateY(0)';
+        button.style.boxShadow = '0 2px 8px rgba(66, 133, 244, 0.3)';
+    });
+    
+    button.onclick = () => {
+        console.log('🎯 Naukri AI analysis triggered!');
+        
+        // Get the extractor instance and trigger analysis
+        if (window.naukriExtractor) {
+            window.naukriExtractor.triggerAIAnalysis();
+        } else {
+            console.error('Naukri extractor not available');
+            alert('Please wait for the page to fully load and try again.');
+        }
+    };
+    
+    // Add debug helper to inspect page structure
+    window.inspectNaukriPage = () => {
+        console.log('🔍 NAUKRI PAGE STRUCTURE INSPECTION');
+        
+        // Find all potential containers
+        const allContainers = document.querySelectorAll('div, section');
+        const candidates = [];
+        
+        allContainers.forEach((el, index) => {
+            const rect = el.getBoundingClientRect();
+            const className = el.className;
+            const innerHTML = el.innerHTML;
+            
+            if (rect.height > 200 && rect.width > 300 && innerHTML.length > 200) {
+                const isHeader = className.toLowerCase().includes('header') || 
+                               className.toLowerCase().includes('title');
+                const hasJobContent = innerHTML.toLowerCase().includes('responsibility') ||
+                                    innerHTML.toLowerCase().includes('requirement') ||
+                                    innerHTML.toLowerCase().includes('experience');
+                
+                candidates.push({
+                    index,
+                    className: className,
+                    dimensions: `${rect.width}x${rect.height}`,
+                    isHeader,
+                    hasJobContent,
+                    textLength: innerHTML.length,
+                    element: el
+                });
+            }
+        });
+        
+        console.table(candidates);
+        console.log('Use candidates[X].element to inspect specific containers');
+        window.naukriCandidates = candidates;
+    };
+    
+    // Add debug helper to find company name elements
+    window.debugNaukriCompany = () => {
+        console.log('🏢 NAUKRI COMPANY NAME DEBUGGING');
+        
+        const allElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, span, div, a, p');
+        const companyClues = [];
+        
+        allElements.forEach((el, index) => {
+            const text = el.textContent?.trim();
+            if (text && text.length > 2 && text.length < 100) {
+                const hasCompanyKeywords = /\b(?:Inc|Ltd|LLC|Corp|Company|Corporation|Technologies|Systems|Solutions|Services|Group|Limited|Pvt\.?\s*Ltd\.?)\b/i.test(text);
+                const isCapitalized = /^[A-Z]/.test(text);
+                const className = el.className;
+                const tagName = el.tagName.toLowerCase();
+                
+                if (hasCompanyKeywords || (isCapitalized && !text.toLowerCase().includes('job'))) {
+                    companyClues.push({
+                        index,
+                        text: text.substring(0, 60),
+                        tagName,
+                        className: className.substring(0, 50),
+                        hasCompanyKeywords,
+                        isCapitalized,
+                        element: el
+                    });
+                }
+            }
+        });
+        
+        console.table(companyClues);
+        console.log('Use window.naukriCompanyCandidates[X].element to inspect elements');
+        window.naukriCompanyCandidates = companyClues;
+    };
+    
+    console.log('✅ Button injection completed');
+    console.log('💡 Debug: Use window.inspectNaukriPage() to analyze page structure');
+    console.log('💡 Debug: Use window.debugNaukriCompany() to find company name elements');
+}
+
+// Try injection immediately
+injectButtonImmediately();
+
+// Try again after short delay
+setTimeout(injectButtonImmediately, 500);
+setTimeout(injectButtonImmediately, 1000);
+setTimeout(injectButtonImmediately, 2000);
+
 class NaukriJobExtractor {
     constructor() {
+        console.log('🏗️ NaukriJobExtractor constructor called');
+        // Force inject button again from constructor
+        setTimeout(injectButtonImmediately, 100);
         this.init();
     }
 
     init() {
+        console.log('🚀 Initializing Naukri Job Extractor');
+        console.log('Current URL:', window.location.href);
+        console.log('Document ready state:', document.readyState);
+        
         this.setupMessageListener();
-        this.detectJobPage();
+        
+        // Make extractor available globally for the immediate button
+        window.naukriExtractor = this;
+        console.log('✅ Naukri extractor made available globally');
+        
+        // Set up ongoing monitoring for page changes
         this.observePageChanges();
+        
+        // Add debug helpers
+        window.forceNaukriUI = () => {
+            console.log('🔧 Force injecting additional Naukri UI...');
+            injectButtonImmediately();
+        };
+        console.log('💡 Debug: Use window.forceNaukriUI() to force inject UI');
+        console.log('💡 Debug: Use window.naukriExtractor.triggerAIAnalysis() to test analysis');
     }
 
     setupMessageListener() {
         chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             if (request.action === 'extractJobData') {
-                this.extractJobData()
-                    .then(jobData => sendResponse({ jobData }))
-                    .catch(error => sendResponse({ error: error.message }));
-                return true; // Keep message channel open for async response
+                // Only respond if we're on a Naukri page
+                if (this.isNaukriJobPage()) {
+                    this.extractJobData()
+                        .then(jobData => sendResponse({ jobData }))
+                        .catch(error => sendResponse({ error: error.message }));
+                    return true; // Keep message channel open for async response
+                }
+                // Don't respond if not on Naukri - let other content scripts handle it
             }
         });
     }
 
     detectJobPage() {
         const isJobPage = this.isNaukriJobPage();
+        console.log('🔍 Naukri page detection result:', {
+            isJobPage: isJobPage,
+            url: window.location.href,
+            timestamp: new Date().toISOString()
+        });
+        
         if (isJobPage) {
-            console.log('Naukri job page detected');
+            console.log('✅ Naukri job page detected - injecting UI');
             // Always reset UI when detecting a new job page
             this.resetJobAnalysisUI();
-            this.injectJobAnalysisUI();
+            
+            // Wait a bit for the page to fully load
+            setTimeout(() => {
+                this.injectJobAnalysisUI();
+            }, 1000);
         } else {
+            console.log('❌ Not a Naukri job page - removing UI');
             // Remove UI if not on a job page
             this.removeJobAnalysisUI();
         }
@@ -36,15 +359,47 @@ class NaukriJobExtractor {
 
     isNaukriJobPage() {
         const url = window.location.href;
-        const isJobListingPage = url.includes('naukri.com/job-listings-');
+        const pathname = window.location.pathname;
         
-        console.log('Naukri Job Page Check:', {
+        const isNaukriDomain = url.includes('naukri.com');
+        const hasJobListings = url.includes('job-listings') || pathname.includes('job-listings');
+        const hasJobDetail = url.includes('jobdetail') || pathname.includes('jobdetail');
+        const hasJobInPath = pathname.includes('job');
+        
+        // Check for common Naukri job URL patterns
+        const jobPatterns = [
+            /job-listings-/i,
+            /jobdetail-/i,
+            /\/jobs\//i,
+            /\/job\//i
+        ];
+        
+        const matchesPattern = jobPatterns.some(pattern => pattern.test(url));
+        
+        const isJobPage = hasJobListings || hasJobDetail || hasJobInPath || matchesPattern;
+        
+        console.log('🔍 Comprehensive Naukri Job Page Check:', {
             url: url,
-            isJobListingPage: isJobListingPage,
-            result: isJobListingPage
+            pathname: pathname,
+            isNaukriDomain: isNaukriDomain,
+            hasJobListings: hasJobListings,
+            hasJobDetail: hasJobDetail,
+            hasJobInPath: hasJobInPath,
+            matchesPattern: matchesPattern,
+            isJobPage: isJobPage,
+            result: isNaukriDomain && isJobPage
         });
         
-        return isJobListingPage;
+        // Return result based on domain and job page patterns
+        const result = isNaukriDomain && isJobPage;
+        
+        if (result) {
+            console.log('✅ Confirmed Naukri job page');
+        } else if (isNaukriDomain) {
+            console.log('ℹ️ On Naukri domain but not a job page');
+        }
+        
+        return result;
     }
 
     async extractJobData() {
@@ -74,8 +429,9 @@ class NaukriJobExtractor {
     extractJobTitle() {
         console.log('🏷️ Extracting Naukri job title...');
         
-        // Naukri job title selectors
+        // Naukri job title selectors (updated for current layout)
         const selectors = [
+            // Primary Naukri selectors
             '.jd-header-title',
             '.jobTitle',
             '.job-title',
@@ -85,7 +441,21 @@ class NaukriJobExtractor {
             '.jd-header h1',
             '.job-header h1',
             '[data-qa="job-title"]',
-            '.job-post-name'
+            '.job-post-name',
+            
+            // Additional modern Naukri selectors
+            '.job-tuple-title',
+            '.job-desc-header h1',
+            '.job-details-title',
+            '.jdp-title',
+            '.job-description h1',
+            'h1[class*="jd"]',
+            'h1[class*="job"]',
+            
+            // Fallback selectors
+            'h1',
+            'h2[class*="title"]',
+            'h2[class*="job"]'
         ];
 
         for (const selector of selectors) {
@@ -139,16 +509,39 @@ class NaukriJobExtractor {
         console.log('🏢 Extracting Naukri company name...');
         
         const selectors = [
+            // Modern Naukri company selectors (2024)
             '.jd-header-comp-name',
             '.companyName',
             '.company-name',
-            '.comp-name',
+            '.comp-name', 
             '.jd-comp-name',
-            '[data-qa="company-name"]',
             '.company',
             '.employer-name',
             '.hiring-company',
-            'a[title*="company"]'
+            
+            // Data attributes
+            '[data-qa="company-name"]',
+            '[data-testid="company-name"]',
+            
+            // Link-based selectors
+            'a[title*="company"]',
+            'a[href*="company"]',
+            'a[class*="company"]',
+            
+            // Generic selectors that might contain company info
+            '.job-company',
+            '.job-employer',
+            '.company-info',
+            '.employer',
+            '.org-name',
+            '.organization',
+            
+            // Broader patterns for modern layouts
+            'span[class*="company"]',
+            'div[class*="company"]',
+            'p[class*="company"]',
+            'h2[class*="company"]',
+            'h3[class*="company"]'
         ];
 
         for (const selector of selectors) {
@@ -168,6 +561,50 @@ class NaukriJobExtractor {
             }
         }
 
+        // Enhanced fallback: Look for company names near job titles or in header areas
+        console.log('  🔄 Trying enhanced company name detection...');
+        
+        // Look for elements that might contain company info in job headers
+        const potentialCompanyElements = document.querySelectorAll('h1, h2, h3, h4, span, div, a, p');
+        const companyPatterns = [
+            /\b(?:Inc|Ltd|LLC|Corp|Company|Corporation|Technologies|Systems|Solutions|Services|Group|Limited)\b/i,
+            /\b(?:Pvt\.?\s*Ltd\.?|Private\s+Limited|Pvt\s+Ltd)\b/i
+        ];
+        
+        for (const element of potentialCompanyElements) {
+            if (element && element.textContent) {
+                const text = this.cleanText(element.textContent);
+                
+                // Skip very long text (likely descriptions) and very short text
+                if (text.length > 3 && text.length < 100) {
+                    // Check if text matches company patterns
+                    const matchesPattern = companyPatterns.some(pattern => pattern.test(text));
+                    
+                    if (matchesPattern && this.isValidCompanyName(text)) {
+                        console.log(`  ✅ Found company by pattern: "${text}"`);
+                        return text;
+                    }
+                    
+                    // Check if it's a likely company name (capitalized, reasonable length)
+                    const isCapitalized = /^[A-Z]/.test(text);
+                    const hasSpaces = text.includes(' ');
+                    const isReasonableLength = text.length >= 3 && text.length <= 50;
+                    const hasNoCommonJobWords = !text.toLowerCase().match(/\b(job|position|role|vacancy|opening|career|work|employment|hiring)\b/);
+                    
+                    if (isCapitalized && isReasonableLength && hasNoCommonJobWords && this.isValidCompanyName(text)) {
+                        // Double-check it's not part of a longer job description
+                        const parentText = element.parentNode?.textContent || '';
+                        const isPartOfLongText = parentText.length > 200;
+                        
+                        if (!isPartOfLongText) {
+                            console.log(`  ✅ Found likely company name: "${text}"`);
+                            return text;
+                        }
+                    }
+                }
+            }
+        }
+        
         console.log('  ❌ No valid company name found');
         return 'Company Not Found';
     }
@@ -318,42 +755,201 @@ class NaukriJobExtractor {
 
     extractSkills() {
         const description = this.extractJobDescription().toLowerCase();
-        const commonSkills = [
-            // Programming languages
+        const comprehensiveSkills = [
+            // Programming Languages
             'javascript', 'python', 'java', 'c++', 'c#', 'ruby', 'php', 'go', 'rust', 'swift', 'kotlin',
-            'typescript', 'scala', 'r', 'matlab', 'sql', 'html', 'css', 'dart', 'perl', 'vb.net',
+            'typescript', 'scala', 'r', 'matlab', 'sql', 'html', 'css', 'dart', 'perl', 'vb.net', 'cobol',
+            'fortran', 'assembly', 'lua', 'haskell', 'clojure', 'erlang', 'elixir', 'f#', 'groovy',
             
-            // Frameworks and libraries
+            // Web Frameworks & Libraries
             'react', 'angular', 'vue', 'node.js', 'express', 'django', 'flask', 'spring', 'laravel',
             'rails', 'bootstrap', 'jquery', 'redux', 'nextjs', 'nuxtjs', 'react native', 'flutter',
+            'svelte', 'ember', 'backbone', 'meteor', 'nestjs', 'fastapi', 'strapi', 'gatsby',
             
-            // Databases
+            // Mobile Development
+            'ios', 'android', 'react native', 'flutter', 'xamarin', 'ionic', 'cordova', 'phonegap',
+            'swift', 'objective-c', 'kotlin', 'java', 'flutter', 'dart',
+            
+            // Databases & Data Storage
             'mysql', 'postgresql', 'mongodb', 'redis', 'elasticsearch', 'oracle', 'sqlite', 'cassandra',
+            'dynamodb', 'firebase', 'couchdb', 'neo4j', 'influxdb', 'mariadb', 'snowflake', 'bigquery',
+            'databricks', 'clickhouse', 'aurora', 'cosmos db', 'amazon rds',
             
-            // Cloud and DevOps
-            'aws', 'azure', 'gcp', 'docker', 'kubernetes', 'jenkins', 'git', 'ci/cd', 'terraform',
-            'ansible', 'puppet', 'chef',
+            // Cloud Platforms & Services
+            'aws', 'azure', 'gcp', 'google cloud', 'amazon web services', 'microsoft azure', 'digital ocean',
+            'heroku', 'linode', 'vultr', 'alibaba cloud', 'ibm cloud', 'oracle cloud',
+            'lambda', 'ec2', 's3', 'cloudfront', 'route 53', 'cloudformation', 'cloudwatch',
             
-            // Tools and technologies
-            'figma', 'sketch', 'photoshop', 'illustrator', 'jira', 'confluence', 'slack',
-            'tableau', 'powerbi', 'excel', 'salesforce', 'sap', 'oracle erp',
+            // DevOps & CI/CD
+            'docker', 'kubernetes', 'jenkins', 'git', 'ci/cd', 'terraform', 'ansible', 'puppet', 'chef',
+            'gitlab', 'github actions', 'circleci', 'travis ci', 'bamboo', 'teamcity', 'helm', 'istio',
+            'prometheus', 'grafana', 'elk stack', 'nagios', 'zabbix', 'datadog', 'new relic',
             
-            // Testing
-            'selenium', 'junit', 'testng', 'cypress', 'jest', 'mocha', 'postman',
+            // Testing & QA
+            'selenium', 'junit', 'testng', 'cypress', 'jest', 'mocha', 'postman', 'rest assured',
+            'cucumber', 'jasmine', 'karma', 'protractor', 'appium', 'robot framework', 'playwright',
+            'load testing', 'performance testing', 'automation testing', 'manual testing',
             
-            // Methodologies
-            'agile', 'scrum', 'kanban', 'devops', 'tdd', 'bdd', 'waterfall',
+            // Design & UX/UI
+            'figma', 'sketch', 'photoshop', 'illustrator', 'adobe xd', 'invision', 'zeplin', 'principle',
+            'framer', 'canva', 'ui/ux design', 'user experience', 'user interface', 'prototyping',
+            'wireframing', 'design systems', 'responsive design', 'accessibility',
             
-            // Soft skills
+            // Project Management & Collaboration
+            'jira', 'confluence', 'slack', 'trello', 'asana', 'monday.com', 'notion', 'basecamp',
+            'microsoft project', 'smartsheet', 'clickup', 'linear', 'github', 'bitbucket',
+            
+            // Business Intelligence & Analytics
+            'tableau', 'powerbi', 'qlik', 'looker', 'excel', 'google analytics', 'mixpanel', 'amplitude',
+            'segment', 'hotjar', 'crazy egg', 'adobe analytics', 'splunk', 'kibana',
+            
+            // Enterprise Software
+            'salesforce', 'sap', 'oracle erp', 'microsoft dynamics', 'workday', 'servicenow',
+            'atlassian', 'hubspot', 'zendesk', 'freshworks', 'zoho', 'netsuite',
+            
+            // Data Science & ML/AI
+            'machine learning', 'deep learning', 'artificial intelligence', 'data science', 'nlp',
+            'computer vision', 'tensorflow', 'pytorch', 'keras', 'scikit-learn', 'pandas', 'numpy',
+            'matplotlib', 'seaborn', 'jupyter', 'apache spark', 'hadoop', 'kafka', 'airflow',
+            'mlflow', 'kubeflow', 'dataiku', 'alteryx', 'sas', 'spss', 'stata',
+            
+            // Security & Cybersecurity
+            'cybersecurity', 'information security', 'network security', 'penetration testing',
+            'vulnerability assessment', 'security auditing', 'encryption', 'firewall', 'vpn',
+            'siem', 'soc', 'incident response', 'malware analysis', 'forensics', 'compliance',
+            'iso 27001', 'nist', 'gdpr', 'hipaa', 'sox', 'pci dss',
+            
+            // Blockchain & Cryptocurrency
+            'blockchain', 'cryptocurrency', 'bitcoin', 'ethereum', 'smart contracts', 'solidity',
+            'web3', 'defi', 'nft', 'hyperledger', 'chaincode', 'truffle', 'metamask',
+            
+            // Industry-Specific Technologies
+            // Finance & Fintech
+            'fintech', 'banking', 'payments', 'forex', 'trading', 'risk management', 'compliance',
+            'kyc', 'aml', 'swift', 'sepa', 'iso 20022', 'fix protocol', 'bloomberg terminal',
+            'reuters', 'murex', 'calypso', 'summit', 'kondor', 'treasury', 'capital markets',
+            
+            // Healthcare & Life Sciences
+            'healthcare', 'medical devices', 'ehr', 'emr', 'fhir', 'hl7', 'dicom', 'clinical trials',
+            'pharmaceutical', 'biotech', 'regulatory affairs', 'fda', 'gmp', 'gcp', 'clinical data management',
+            'pharmacovigilance', 'medical affairs', 'drug discovery', 'bioinformatics',
+            
+            // E-commerce & Retail
+            'e-commerce', 'retail', 'pos', 'inventory management', 'supply chain', 'logistics',
+            'wms', 'erp', 'crm', 'magento', 'shopify', 'woocommerce', 'prestashop',
+            'payment gateways', 'fraud detection', 'recommendation engines',
+            
+            // Manufacturing & Industrial
+            'manufacturing', 'industrial automation', 'plc', 'scada', 'mes', 'erp', 'lean manufacturing',
+            'six sigma', 'quality control', 'iso 9001', 'kaizen', 'just in time', 'supply chain',
+            'predictive maintenance', 'iiot', 'industry 4.0',
+            
+            // Education & EdTech
+            'education', 'edtech', 'e-learning', 'lms', 'moodle', 'blackboard', 'canvas',
+            'instructional design', 'curriculum development', 'assessment', 'gamification',
+            
+            // Media & Entertainment
+            'media', 'entertainment', 'streaming', 'content management', 'digital marketing',
+            'social media', 'seo', 'sem', 'content creation', 'video editing', 'audio editing',
+            'broadcast', 'ott platforms', 'cdn',
+            
+            // Telecommunications
+            'telecommunications', 'telecom', 'network engineering', '5g', '4g', 'lte', 'voip',
+            'sip', 'ims', 'bss', 'oss', 'network optimization', 'rf engineering',
+            
+            // Energy & Utilities
+            'energy', 'utilities', 'renewable energy', 'smart grid', 'scada', 'power systems',
+            'electrical engineering', 'oil and gas', 'mining', 'environmental monitoring',
+            
+            // Transportation & Logistics
+            'transportation', 'logistics', 'fleet management', 'route optimization', 'gps tracking',
+            'telematics', 'warehouse management', 'tms', 'automotive', 'aerospace',
+            
+            // Real Estate & PropTech
+            'real estate', 'proptech', 'property management', 'facility management', 'construction',
+            'bim', 'cad', 'architecture', 'urban planning', 'smart buildings',
+            
+            // Methodologies & Frameworks
+            'agile', 'scrum', 'kanban', 'devops', 'tdd', 'bdd', 'waterfall', 'lean', 'six sigma',
+            'itil', 'prince2', 'pmbok', 'safe', 'less', 'extreme programming', 'feature driven development',
+            
+            // Soft Skills & Professional Skills
             'leadership', 'teamwork', 'communication', 'project management', 'problem solving',
-            'analytical thinking', 'time management'
+            'analytical thinking', 'time management', 'strategic planning', 'stakeholder management',
+            'change management', 'risk management', 'vendor management', 'budget management',
+            'team building', 'mentoring', 'coaching', 'public speaking', 'presentation skills',
+            'negotiation', 'conflict resolution', 'decision making', 'critical thinking',
+            'innovation', 'creativity', 'adaptability', 'emotional intelligence', 'cultural awareness',
+            
+            // Certifications & Standards
+            'pmp', 'csm', 'psm', 'aws certified', 'azure certified', 'gcp certified', 'cissp', 'cisa',
+            'cism', 'comptia', 'cisco certified', 'microsoft certified', 'oracle certified',
+            'salesforce certified', 'scrum master', 'product owner', 'itil certified'
         ];
 
-        const foundSkills = commonSkills.filter(skill => 
-            description.includes(skill.toLowerCase())
-        );
+        // Enhanced skill detection with fuzzy matching
+        const foundSkills = [];
+        
+        comprehensiveSkills.forEach(skill => {
+            const skillLower = skill.toLowerCase();
+            
+            // Direct match
+            if (description.includes(skillLower)) {
+                foundSkills.push(skill);
+                return;
+            }
+            
+            // Handle variations and common abbreviations
+            const variations = this.getSkillVariations(skill);
+            for (const variation of variations) {
+                if (description.includes(variation.toLowerCase())) {
+                    foundSkills.push(skill);
+                    break;
+                }
+            }
+        });
 
-        return foundSkills;
+        // Remove duplicates and return
+        return [...new Set(foundSkills)];
+    }
+
+    getSkillVariations(skill) {
+        const variations = [skill];
+        
+        // Add common variations
+        const skillVariations = {
+            'javascript': ['js', 'ecmascript', 'es6', 'es2015', 'es2020'],
+            'typescript': ['ts'],
+            'python': ['py', 'python3'],
+            'c#': ['csharp', 'c sharp', '.net', 'dotnet'],
+            'c++': ['cpp', 'cplusplus'],
+            'node.js': ['nodejs', 'node js'],
+            'react native': ['reactnative', 'react-native'],
+            'postgresql': ['postgres', 'psql'],
+            'mongodb': ['mongo'],
+            'elasticsearch': ['elastic search', 'elk'],
+            'amazon web services': ['aws'],
+            'google cloud': ['gcp', 'google cloud platform'],
+            'microsoft azure': ['azure'],
+            'artificial intelligence': ['ai'],
+            'machine learning': ['ml'],
+            'natural language processing': ['nlp'],
+            'user interface': ['ui'],
+            'user experience': ['ux'],
+            'search engine optimization': ['seo'],
+            'search engine marketing': ['sem'],
+            'application programming interface': ['api'],
+            'software development kit': ['sdk'],
+            'continuous integration': ['ci'],
+            'continuous deployment': ['cd'],
+            'continuous delivery': ['cd']
+        };
+        
+        if (skillVariations[skill.toLowerCase()]) {
+            variations.push(...skillVariations[skill.toLowerCase()]);
+        }
+        
+        return variations;
     }
 
     extractExperienceLevel() {
@@ -424,38 +1020,117 @@ class NaukriJobExtractor {
     }
 
     injectJobAnalysisUI() {
-        // Target elements specific to Naukri layout
+        // Enhanced target elements for modern Naukri layout
         const targetSelectors = [
+            // Modern Naukri selectors (2024)
             '.jd-header',
             '.job-header',
-            '.jobTitle',
+            '.jd-header-details',
+            '.job-detail-header',
             '.jd-header-title',
-            '.job-detail-header'
+            '.jobTitle',
+            '.job-title',
+            '.title',
+            
+            // Alternative modern selectors
+            '.job-tuple-container',
+            '.job-desc-header',
+            '.job-details-container',
+            '.jdp-header',
+            '.job-posting-header',
+            
+            // Generic fallbacks
+            'h1[class*="title"]',
+            'h1[class*="job"]',
+            'div[class*="header"]',
+            'section[class*="job"]',
+            
+            // Last resort - insert at top of body
+            'body'
         ];
 
+        console.log('🎯 Attempting to inject Naukri UI...');
+        console.log('Available DOM elements:', {
+            h1Count: document.querySelectorAll('h1').length,
+            titleElements: document.querySelectorAll('[class*="title"]').length,
+            headerElements: document.querySelectorAll('[class*="header"]').length,
+            jobElements: document.querySelectorAll('[class*="job"]').length
+        });
+
         let targetElement = null;
+        let selectedSelector = '';
+        
         for (const selector of targetSelectors) {
-            targetElement = document.querySelector(selector);
-            if (targetElement) {
-                console.log(`Found target element: ${selector}`);
-                break;
+            const elements = document.querySelectorAll(selector);
+            console.log(`  Checking selector: ${selector} (found ${elements.length} elements)`);
+            
+            if (elements.length > 0) {
+                // Take the first visible element
+                for (const element of elements) {
+                    const rect = element.getBoundingClientRect();
+                    if (rect.height > 0 && rect.width > 0) {
+                        targetElement = element;
+                        selectedSelector = selector;
+                        console.log(`  ✅ Selected: ${selector}`, {
+                            tagName: element.tagName,
+                            className: element.className,
+                            textContent: element.textContent.substring(0, 100)
+                        });
+                        break;
+                    }
+                }
+                if (targetElement) break;
             }
         }
 
         if (targetElement) {
             const analysisBtn = this.createAnalysisButton();
-            targetElement.parentNode.insertBefore(analysisBtn, targetElement.nextSibling);
+            
+            // Smart insertion logic based on element type
+            if (selectedSelector === 'body') {
+                // Insert at top of page for body fallback
+                targetElement.insertBefore(analysisBtn, targetElement.firstChild);
+            } else {
+                // Insert after the target element
+                targetElement.parentNode.insertBefore(analysisBtn, targetElement.nextSibling);
+            }
+            
+            console.log(`🎉 Successfully injected Naukri UI using selector: ${selectedSelector}`);
         } else {
-            console.log('No suitable target element found for Naukri UI injection');
+            console.error('❌ No suitable target element found for Naukri UI injection');
+            console.log('DOM structure sample:', document.body.innerHTML.substring(0, 500));
+            
+            // Emergency fallback - insert at beginning of body
+            console.log('🚨 Using emergency fallback injection');
+            const analysisBtn = this.createAnalysisButton();
+            // Ensure emergency button is visible
+            analysisBtn.style.cssText = `
+                position: fixed !important;
+                top: 20px !important;
+                right: 20px !important;
+                z-index: 999999 !important;
+                background: #4285f4 !important;
+                color: white !important;
+                padding: 12px !important;
+                border-radius: 8px !important;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+                font-size: 14px !important;
+                cursor: pointer !important;
+                min-width: 200px !important;
+                text-align: center !important;
+            `;
+            document.body.appendChild(analysisBtn);
         }
     }
 
     createAnalysisButton() {
+        console.log('🎨 Creating Naukri analysis button...');
         const button = document.createElement('div');
         button.id = 'ai-resume-analysis-btn-naukri';
+        button.textContent = '🤖 Customize Resume with AI';
         
-        const buttonElement = document.createElement('div');
-        buttonElement.style.cssText = `
+        // Set inline styles to ensure visibility
+        button.style.cssText = `
             margin: 16px 0;
             padding: 12px 16px;
             background: #4285f4;
@@ -469,60 +1144,65 @@ class NaukriJobExtractor {
             user-select: none;
             max-width: 300px;
             box-shadow: 0 2px 4px rgba(66, 133, 244, 0.3);
+            z-index: 1000;
+            display: block !important;
         `;
-        buttonElement.textContent = '🤖 Customize Resume with AI';
-        buttonElement.setAttribute('data-original-text', '🤖 Customize Resume with AI');
         
-        // Add event listeners instead of inline handlers
-        buttonElement.addEventListener('mouseover', () => {
-            buttonElement.style.background = '#3367d6';
+        // Add event listeners
+        button.addEventListener('mouseover', () => {
+            button.style.background = '#3367d6';
         });
         
-        buttonElement.addEventListener('mouseout', () => {
-            buttonElement.style.background = '#4285f4';
+        button.addEventListener('mouseout', () => {
+            button.style.background = '#4285f4';
         });
         
-        buttonElement.addEventListener('click', () => {
+        button.addEventListener('click', () => {
+            console.log('🎯 Naukri button clicked!');
             this.triggerAIAnalysis();
         });
 
-        button.appendChild(buttonElement);
+        console.log('✅ Naukri button created successfully');
         return button;
     }
 
     async triggerAIAnalysis() {
         try {
             const button = document.getElementById('ai-resume-analysis-btn-naukri');
-            const buttonElement = button.querySelector('div');
-            const originalText = buttonElement.getAttribute('data-original-text') || '🤖 Customize Resume with AI';
+            if (!button) {
+                throw new Error('Button not found');
+            }
             
-            button.innerHTML = `
-                <div style="
-                    margin: 16px 0;
-                    padding: 12px 16px;
-                    background: #666;
-                    color: white;
-                    border-radius: 8px;
-                    text-align: center;
-                    font-size: 14px;
-                    max-width: 300px;
-                ">
-                    ⏳ Analyzing Naukri job posting...
-                </div>
-            `;
+            const originalText = button.textContent || '🤖 Customize Resume with AI';
+            
+            // Update button to loading state
+            const originalStyle = button.style.cssText;
+            button.style.background = '#666';
+            button.textContent = '⏳ Analyzing Naukri job posting...';
 
             // Extract job data and send to extension
             console.log('Starting Naukri job data extraction...');
             const jobData = await this.extractJobData();
             console.log('Naukri job data extracted:', jobData);
             
-            // Validate job data
+            // Validate job data with enhanced debugging
+            console.log('🔍 Validating extracted job data:', {
+                title: jobData.title,
+                titleLength: jobData.title?.length,
+                description: jobData.description?.substring(0, 100) + '...',
+                descriptionLength: jobData.description?.length,
+                company: jobData.company,
+                platform: jobData.platform
+            });
+            
             if (!jobData.title || jobData.title === 'Job Title Not Found') {
-                throw new Error('Could not extract job title. Please make sure you are on a Naukri job posting page.');
+                console.error('❌ Job title extraction failed');
+                throw new Error('Could not extract job title from this Naukri page. The page structure might have changed or still be loading.');
             }
 
             if (!jobData.description || jobData.description === 'Job description not found') {
-                throw new Error('Could not extract job description. The page might still be loading.');
+                console.error('❌ Job description extraction failed');
+                throw new Error('Could not extract job description from this Naukri page. Please wait for the page to fully load and try again.');
             }
 
             // Send message to background script to trigger popup analysis
@@ -534,54 +1214,25 @@ class NaukriJobExtractor {
             console.log('Message sent to background script, response:', response);
 
             // Show success state
-            button.innerHTML = `
-                <div style="
-                    margin: 16px 0;
-                    padding: 12px 16px;
-                    background: #10b981;
-                    color: white;
-                    border-radius: 8px;
-                    text-align: center;
-                    font-size: 14px;
-                    max-width: 300px;
-                ">
-                    ✅ Job analyzed! Open extension popup to customize resume.
-                </div>
-            `;
+            button.style.background = '#10b981';
+            button.textContent = '✅ Job analyzed! Open extension popup.';
 
             // Show notification
             this.showNotification('Naukri job analyzed successfully! Click the extension icon to customize your resume.', 'success');
 
             setTimeout(() => {
                 // Reset button to original state
-                button.innerHTML = `
-                    <div style="
-                        margin: 16px 0;
-                        padding: 12px 16px;
-                        background: #4285f4;
-                        color: white;
-                        border-radius: 8px;
-                        cursor: pointer;
-                        font-weight: 500;
-                        text-align: center;
-                        transition: background-color 0.2s;
-                        font-size: 14px;
-                        user-select: none;
-                        max-width: 300px;
-                        box-shadow: 0 2px 4px rgba(66, 133, 244, 0.3);
-                    " data-original-text="${originalText}">
-                        ${originalText}
-                    </div>
-                `;
+                button.style.cssText = originalStyle;
+                button.textContent = originalText;
+                
                 // Re-attach event listeners
-                const newButtonElement = button.querySelector('div');
-                newButtonElement.addEventListener('mouseover', () => {
-                    newButtonElement.style.background = '#3367d6';
+                button.addEventListener('mouseover', () => {
+                    button.style.background = '#3367d6';
                 });
-                newButtonElement.addEventListener('mouseout', () => {
-                    newButtonElement.style.background = '#4285f4';
+                button.addEventListener('mouseout', () => {
+                    button.style.background = '#4285f4';
                 });
-                newButtonElement.addEventListener('click', () => {
+                button.addEventListener('click', () => {
                     this.triggerAIAnalysis();
                 });
             }, 5000);
@@ -590,57 +1241,32 @@ class NaukriJobExtractor {
             console.error('Naukri analysis error:', error);
             
             const button = document.getElementById('ai-resume-analysis-btn-naukri');
-            button.innerHTML = `
-                <div style="
-                    margin: 16px 0;
-                    padding: 12px 16px;
-                    background: #ef4444;
-                    color: white;
-                    border-radius: 8px;
-                    text-align: center;
-                    font-size: 14px;
-                    max-width: 300px;
-                ">
-                    ❌ ${error.message || 'Analysis failed. Try again.'}
-                </div>
-            `;
+            if (button) {
+                button.style.background = '#ef4444';
+                button.textContent = `❌ ${error.message || 'Analysis failed. Try again.'}`;
+            }
 
             // Show error notification
             this.showNotification('Naukri job analysis failed: ' + (error.message || 'Unknown error'), 'error');
 
             setTimeout(() => {
                 // Reset button to original state after error
-                const originalText = '🤖 Customize Resume with AI';
-                button.innerHTML = `
-                    <div style="
-                        margin: 16px 0;
-                        padding: 12px 16px;
-                        background: #4285f4;
-                        color: white;
-                        border-radius: 8px;
-                        cursor: pointer;
-                        font-weight: 500;
-                        text-align: center;
-                        transition: background-color 0.2s;
-                        font-size: 14px;
-                        user-select: none;
-                        max-width: 300px;
-                        box-shadow: 0 2px 4px rgba(66, 133, 244, 0.3);
-                    " data-original-text="${originalText}">
-                        ${originalText}
-                    </div>
-                `;
-                // Re-attach event listeners
-                const newButtonElement = button.querySelector('div');
-                newButtonElement.addEventListener('mouseover', () => {
-                    newButtonElement.style.background = '#3367d6';
-                });
-                newButtonElement.addEventListener('mouseout', () => {
-                    newButtonElement.style.background = '#4285f4';
-                });
-                newButtonElement.addEventListener('click', () => {
-                    this.triggerAIAnalysis();
-                });
+                if (button) {
+                    const originalText = '🤖 Customize Resume with AI';
+                    button.style.background = '#4285f4';
+                    button.textContent = originalText;
+                    
+                    // Re-attach event listeners
+                    button.addEventListener('mouseover', () => {
+                        button.style.background = '#3367d6';
+                    });
+                    button.addEventListener('mouseout', () => {
+                        button.style.background = '#4285f4';
+                    });
+                    button.addEventListener('click', () => {
+                        this.triggerAIAnalysis();
+                    });
+                }
             }, 5000);
         }
     }

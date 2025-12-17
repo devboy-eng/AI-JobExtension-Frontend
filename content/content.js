@@ -13,10 +13,14 @@ class LinkedInJobExtractor {
     setupMessageListener() {
         chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             if (request.action === 'extractJobData') {
-                this.extractJobData()
-                    .then(jobData => sendResponse({ jobData }))
-                    .catch(error => sendResponse({ error: error.message }));
-                return true; // Keep message channel open for async response
+                // Only respond if we're on a LinkedIn page
+                if (this.isLinkedInJobPage()) {
+                    this.extractJobData()
+                        .then(jobData => sendResponse({ jobData }))
+                        .catch(error => sendResponse({ error: error.message }));
+                    return true; // Keep message channel open for async response
+                }
+                // Don't respond if not on LinkedIn - let other content scripts handle it
             }
         });
     }

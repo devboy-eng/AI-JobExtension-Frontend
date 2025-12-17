@@ -34,7 +34,9 @@
       "css": ["content/content.css"]
     },
     {
-      "matches": ["https://www.naukri.com/job-listings-*"],
+      "matches": [
+        "https://www.naukri.com/*"
+      ],
       "js": ["content/naukri-content.js"],
       "css": ["content/content.css"]
     }
