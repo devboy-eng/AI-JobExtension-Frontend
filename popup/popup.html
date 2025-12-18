@@ -37,6 +37,10 @@
                 </div>
                 <button class="history-btn" id="historyBtn" title="View customization history">H</button>
                 <button class="version-btn" id="versionBtn" title="View version history">V</button>
+                <button class="support-btn" id="supportBtn">
+                    <span class="support-icon">📞</span>
+                    <span class="support-tooltip">Support: +918866666476</span>
+                </button>
                 <div class="status-indicator" id="statusIndicator">
                     <span class="status-dot"></span>
                     <span class="status-text">Ready</span>
@@ -145,49 +149,6 @@
                     </div>
                 </div>
 
-                <!-- Coin Management Section -->
-                <div class="coin-management" id="coinManagement" style="display: none;">
-                    <h3>💰 Coin Management</h3>
-                    <div class="coin-info">
-                        <p>Each AI resume customization costs <strong>10 coins</strong></p>
-                        <div class="current-balance">
-                            <span>Current Balance: </span>
-                            <span class="balance-amount" id="accountCoinBalance">0</span>
-                            <span> 🪙</span>
-                        </div>
-                    </div>
-                    
-                    <div class="recharge-section">
-                        <h4>Recharge Coins</h4>
-                        <div class="recharge-options">
-                            <button class="recharge-btn" data-amount="100" data-price="₹200">
-                                100 coins - ₹200
-                            </button>
-                            <button class="recharge-btn" data-amount="250" data-price="₹500">
-                                250 coins - ₹500
-                            </button>
-                            <button class="recharge-btn" data-amount="500" data-price="₹1000">
-                                500 coins - ₹1000
-                            </button>
-                        </div>
-                        
-                        <div class="custom-recharge">
-                            <h5>Custom Amount</h5>
-                            <div class="form-group">
-                                <input type="number" id="customCoinAmount" placeholder="Enter amount" min="1" max="10000">
-                                <button class="btn btn-primary" id="customRechargeBtn">Add Coins</button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="transaction-history">
-                        <h4>Recent Transactions</h4>
-                        <button class="btn btn-secondary" id="viewTransactionsBtn">View Full History</button>
-                        <div id="recentTransactions" class="transactions-list">
-                            <!-- Recent transactions will be displayed here -->
-                        </div>
-                    </div>
-                </div>
                 
                 <!-- Status Messages -->
                 <div id="authMessage" class="auth-message" style="display: none;"></div>
@@ -246,7 +207,7 @@
                 </div>
                 <div class="form-group">
                     <label for="languages">Languages</label>
-                    <textarea id="languages" placeholder="English, Spanish, etc. (comma separated)"></textarea>
+                    <textarea id="languages" placeholder="Enter languages (comma separated)"></textarea>
                 </div>
             </div>
 
@@ -472,6 +433,80 @@
                 
                 <div class="history-footer">
                     <p class="text-muted">Download your AI-customized resumes in PDF or DOC format</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Coin Management Page -->
+    <div id="coinManagementModal" style="display: none;">
+        <div class="modal coin-modal">
+            <div class="modal-header">
+                <h3>💰 Coin Management</h3>
+                <button class="modal-close" id="closeCoinModal">×</button>
+            </div>
+            <div class="modal-content">
+                <div class="coin-dashboard">
+                    <div class="balance-card">
+                        <div class="balance-info">
+                            <h2 class="balance-amount">
+                                <span id="modalCoinBalance">0</span>
+                                <span class="coin-symbol">🪙</span>
+                            </h2>
+                            <p class="balance-label">Current Balance</p>
+                        </div>
+                        <div class="cost-info">
+                            <p class="cost-detail">💼 AI Resume Customization: <strong>10 coins</strong></p>
+                        </div>
+                    </div>
+
+                    <div class="recharge-section">
+                        <h4>💳 Recharge Coins</h4>
+                        <div class="recharge-grid">
+                            <div class="recharge-option" data-amount="50" data-price="₹500">
+                                <div class="package-info">
+                                    <div class="package-header">
+                                        <span class="package-coins">50 🪙</span>
+                                        <span class="package-price">₹500</span>
+                                    </div>
+                                    <div class="package-value">₹10 per coin</div>
+                                </div>
+                                <button class="btn btn-primary recharge-btn">Buy Now</button>
+                            </div>
+                            <div class="recharge-option" data-amount="100" data-price="₹1000">
+                                <div class="package-info">
+                                    <div class="package-header">
+                                        <span class="package-coins">100 🪙</span>
+                                        <span class="package-price">₹1000</span>
+                                    </div>
+                                    <div class="package-value">₹10 per coin</div>
+                                </div>
+                                <button class="btn btn-primary recharge-btn">Buy Now</button>
+                            </div>
+                        </div>
+                        
+                        <div class="custom-recharge-section">
+                            <h5>Custom Amount</h5>
+                            <div class="custom-recharge-form">
+                                <input type="number" id="customCoinAmountModal" placeholder="Enter coins (min 10)" min="10" max="10000">
+                                <span class="price-preview" id="customPricePreview">₹0</span>
+                                <button class="btn btn-primary" id="customRechargeModalBtn">Add Coins</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="transaction-section">
+                        <div class="section-header">
+                            <h4>📊 Transaction History</h4>
+                            <button class="btn btn-secondary btn-sm" id="viewAllTransactionsBtn">View All</button>
+                        </div>
+                        <div class="transactions-container" id="recentTransactionsModal">
+                            <!-- Recent transactions will be displayed here -->
+                            <div class="no-transactions">
+                                <p>No transactions yet. Purchase your first coins to get started!</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

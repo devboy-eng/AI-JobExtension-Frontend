@@ -96,6 +96,26 @@ class ResumeCustomizer {
         document.getElementById('historyBtn').addEventListener('click', () => this.showHistoryModal());
         document.getElementById('closeHistoryModal').addEventListener('click', () => this.hideHistoryModal());
 
+        // Support button
+        document.getElementById('supportBtn').addEventListener('click', () => {
+            // Copy phone number to clipboard
+            navigator.clipboard.writeText('+918866666476').then(() => {
+                this.showNotification('Support number copied to clipboard!', 'success');
+            }).catch(() => {
+                // Fallback if clipboard fails
+                this.showNotification('Support: +918866666476', 'info');
+            });
+        });
+
+        // Coin management modal
+        document.getElementById('closeCoinModal').addEventListener('click', () => this.hideCoinManagementModal());
+        
+        // Close modal when clicking outside
+        document.getElementById('coinManagementModal').addEventListener('click', (e) => {
+            if (e.target.id === 'coinManagementModal') {
+                this.hideCoinManagementModal();
+            }
+        });
 
         // Authentication event listeners
         this.setupAuthEventListeners();
@@ -2028,6 +2048,41 @@ class ResumeCustomizer {
             });
         }
 
+        // Modal-specific recharge button
+        const customRechargeModalBtn = document.getElementById('customRechargeModalBtn');
+        if (customRechargeModalBtn) {
+            customRechargeModalBtn.addEventListener('click', () => {
+                const amountInput = document.getElementById('customCoinAmountModal');
+                const amount = parseInt(amountInput.value);
+                if (amount >= 10) {
+                    this.rechargeCoins(amount);
+                    amountInput.value = '';
+                    // Update price preview
+                    document.getElementById('customPricePreview').textContent = '₹0';
+                } else {
+                    this.showAuthMessage('Minimum 10 coins required', 'error');
+                }
+            });
+        }
+
+        // Custom amount input price preview
+        const customAmountModalInput = document.getElementById('customCoinAmountModal');
+        if (customAmountModalInput) {
+            customAmountModalInput.addEventListener('input', () => {
+                const amount = parseInt(customAmountModalInput.value) || 0;
+                const price = amount * 10; // ₹10 per coin
+                document.getElementById('customPricePreview').textContent = `₹${price}`;
+            });
+        }
+
+        // View all transactions button
+        const viewAllTransactionsBtn = document.getElementById('viewAllTransactionsBtn');
+        if (viewAllTransactionsBtn) {
+            viewAllTransactionsBtn.addEventListener('click', () => {
+                this.showTransactionHistory();
+            });
+        }
+
         // View transactions button (now in modal)
         const viewTransactionsBtn = document.getElementById('viewTransactionsBtn');
         if (viewTransactionsBtn) {
@@ -2050,8 +2105,8 @@ class ResumeCustomizer {
         }
 
         try {
-            // Calculate price based on coin amount (₹2 per coin for demo)
-            const priceInINR = amount * 2; // You can adjust the pricing
+            // Calculate price based on coin amount (₹10 per coin)
+            const priceInINR = amount * 10;
             
             // Create Razorpay order
             const response = await this.makeAuthenticatedRequest('http://localhost:4003/api/payment/create-order', {
@@ -2188,7 +2243,6 @@ class ResumeCustomizer {
         document.getElementById('signupForm').style.display = 'none';
         document.getElementById('forgotPasswordForm').style.display = 'none';
         document.getElementById('loggedInState').style.display = 'block';
-        document.getElementById('coinManagement').style.display = 'block';
         
         if (this.currentUser) {
             document.getElementById('userEmail').textContent = this.currentUser.email;
@@ -2610,25 +2664,61 @@ class ResumeCustomizer {
         this.showAuthMessage('Full transaction history feature coming soon!', 'info');
     }
 
-    // Handle coin balance click to show transactions
+    // Handle coin balance click to show coin management modal
     async showTransactionsFromCoinBalance() {
         if (!this.isAuthenticated()) {
-            this.showAuthMessage('Please log in to view transactions', 'error');
+            this.showAuthMessage('Please log in to manage coins', 'error');
             return;
         }
         
-        // Switch to Account tab
-        this.switchTab('auth');
+        // Show the coin management modal
+        this.showCoinManagementModal();
+    }
+
+    // Show coin management modal
+    async showCoinManagementModal() {
+        // Update coin balance in modal
+        await this.updateModalCoinBalance();
         
-        // Refresh transaction history
-        await this.loadRecentTransactions();
+        // Load recent transactions
+        await this.loadModalTransactions();
         
-        // Show coin management section
-        const coinManagement = document.getElementById('coinManagement');
-        if (coinManagement) {
-            coinManagement.style.display = 'block';
-            coinManagement.scrollIntoView({ behavior: 'smooth' });
+        // Show the modal
+        document.getElementById('coinManagementModal').style.display = 'block';
+    }
+
+    // Update coin balance in modal
+    async updateModalCoinBalance() {
+        try {
+            const user = await this.getCurrentUser();
+            const balance = user?.coins || 0;
+            document.getElementById('modalCoinBalance').textContent = balance;
+        } catch (error) {
+            console.error('Error updating modal coin balance:', error);
+            document.getElementById('modalCoinBalance').textContent = '0';
         }
+    }
+
+    // Load transactions for modal
+    async loadModalTransactions() {
+        try {
+            // For now, show placeholder - in production, load from API
+            const transactionsContainer = document.getElementById('recentTransactionsModal');
+            const noTransactions = transactionsContainer.querySelector('.no-transactions');
+            
+            // You can replace this with actual API call
+            if (noTransactions) {
+                // Keep the no transactions message for now
+                // Later replace with: const transactions = await this.fetchUserTransactions();
+            }
+        } catch (error) {
+            console.error('Error loading modal transactions:', error);
+        }
+    }
+
+    // Hide coin management modal
+    hideCoinManagementModal() {
+        document.getElementById('coinManagementModal').style.display = 'none';
     }
 
     // Clear local storage data to prevent cross-user contamination
