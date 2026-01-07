@@ -43,7 +43,7 @@ class BackgroundService {
             settings: {
                 aiProvider: 'openai', // 'openai' or 'gemini'
                 apiKey: '',
-                backendUrl: 'http://localhost:4003',
+                backendUrl: 'https://ai-jobextension-backend.onrender.com',
                 autoSave: true,
                 notifications: true
             },
@@ -145,43 +145,54 @@ class BackgroundService {
 
     buildAIPrompt(jobData, profileData) {
         return `
-You are an expert resume writer and ATS optimization specialist. Please analyze the following job posting and candidate profile, then create a customized resume that maximizes ATS match score and appeal to recruiters.
+You are an expert ATS (Applicant Tracking System) resume optimization specialist. Create a HIGHLY ATS-OPTIMIZED resume that will pass automated screening and rank high for this specific job.
 
-JOB POSTING:
+=== JOB POSTING ANALYSIS ===
 Title: ${jobData.title}
 Company: ${jobData.company}
 Location: ${jobData.location}
-Description: ${jobData.description}
+Full Description: ${jobData.description}
 Required Skills: ${jobData.skills.join(', ')}
 Experience Level: ${jobData.experience}
 
-CANDIDATE PROFILE:
+=== CANDIDATE INFORMATION ===
 Name: ${profileData.name}
-Current Title: ${profileData.designation}
+Current Role: ${profileData.designation}
 Email: ${profileData.email}
 Phone: ${profileData.phone}
+LinkedIn: ${profileData.linkedin || 'Not provided'}
+Address: ${profileData.address || 'Not provided'}
 Skills: ${profileData.skills}
 Work Experience: ${JSON.stringify(profileData.workExperience || [])}
 Education: ${profileData.education}
 Languages: ${profileData.languages}
+Certificates: ${JSON.stringify(profileData.certificates || [])}
 
-TASKS:
-1. Customize the resume content to match job requirements
-2. Optimize keywords for ATS systems
-3. Highlight relevant experience and skills
-4. Calculate ATS match percentage
-5. Provide improvement recommendations
+=== CRITICAL ATS REQUIREMENTS ===
+You MUST create a resume following these STRICT ATS guidelines:
 
-RESPONSE FORMAT (JSON):
+1. **PROFESSIONAL SUMMARY**: 3-4 lines tailored to job, include exact job title, incorporate 3-5 key skills, quantify achievements
+2. **KEYWORD OPTIMIZATION**: Extract ALL keywords from job description, match EXACT phrasing, ensure 70-80% keyword match rate
+3. **CORE SKILLS SECTION**: List 10-15 most relevant skills, prioritize job requirements, use exact terminology
+4. **WORK EXPERIENCE**: Strong action verbs, quantified achievements, mirror job language, 3-5 bullets per role
+5. **ATS-FRIENDLY FORMATTING**: Clean minimalist design, Arial/Calibri fonts, clear sections, standard bullets, no graphics
+6. **SECTION ORDER**: Contact → Summary → Skills → Experience → Education → Certifications → Languages
+
+=== RESPONSE FORMAT (JSON) ===
 {
-    "customizedContent": "HTML formatted resume content",
+    "customizedContent": "Complete HTML formatted resume following ALL ATS guidelines above",
+    "professionalSummary": "The generated professional summary text",
     "atsScore": 85,
-    "keywordsMatched": ["keyword1", "keyword2"],
-    "keywordsMissing": ["missing1", "missing2"],
-    "recommendations": ["Add more React experience", "Include certifications"]
+    "keywordsExtracted": ["all", "keywords", "from", "job"],
+    "keywordsMatched": ["keywords", "successfully", "included"],
+    "keywordsMissing": ["keywords", "not", "included"],
+    "matchPercentage": "75%",
+    "coreSkills": ["skill1", "skill2", "skill3"],
+    "recommendations": ["Specific actionable recommendations"],
+    "atsCompliance": {"formatting": true, "keywords": true, "structure": true, "readability": true}
 }
 
-Focus on making the resume highly relevant to the job posting while maintaining truthfulness about the candidate's experience.
+CRITICAL: Resume MUST be 100% ATS-compliant, use ONLY provided info, optimize for major ATS systems (Taleo, Workday, iCIMS), maintain professional tone.
         `;
     }
 

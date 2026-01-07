@@ -210,7 +210,7 @@ class ResumeCustomizer {
         
         try {
             // Save to backend
-            const response = await this.makeAuthenticatedRequest('http://localhost:4003/api/profile', {
+            const response = await this.makeAuthenticatedRequest('https://ai-jobextension-backend.onrender.com/api/profile', {
                 method: 'POST',
                 body: JSON.stringify(profileData)
             });
@@ -637,7 +637,7 @@ class ResumeCustomizer {
             const fileData = data.uploadedResume;
             
             // Call backend API to parse resume (authenticated)
-            const response = await this.makeAuthenticatedRequest('http://localhost:4003/api/parse-resume', {
+            const response = await this.makeAuthenticatedRequest('https://ai-jobextension-backend.onrender.com/api/parse-resume', {
                 method: 'POST',
                 body: JSON.stringify({
                     fileData: fileData.data,
@@ -870,7 +870,7 @@ class ResumeCustomizer {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
             
-            const response = await this.makeAuthenticatedRequest('http://localhost:4003/api/ai/customize', {
+            const response = await this.makeAuthenticatedRequest('https://ai-jobextension-backend.onrender.com/api/ai/customize', {
                 method: 'POST',
                 body: JSON.stringify({
                     jobData: jobData,
@@ -1023,7 +1023,7 @@ class ResumeCustomizer {
             
             if (format === 'pdf') {
                 // Call backend to generate actual PDF (authenticated)
-                const response = await this.makeAuthenticatedRequest('http://localhost:4003/api/download/pdf', {
+                const response = await this.makeAuthenticatedRequest('https://ai-jobextension-backend.onrender.com/api/download/pdf', {
                     method: 'POST',
                     body: JSON.stringify({
                         htmlContent: htmlContent,
@@ -1072,7 +1072,7 @@ class ResumeCustomizer {
                 
             } else {
                 // For DOC format, call backend to generate actual Word document
-                const response = await this.makeAuthenticatedRequest('http://localhost:4003/api/download/doc', {
+                const response = await this.makeAuthenticatedRequest('https://ai-jobextension-backend.onrender.com/api/download/doc', {
                     method: 'POST',
                     body: JSON.stringify({
                         htmlContent: htmlContent,
@@ -1521,7 +1521,7 @@ class ResumeCustomizer {
         try {
             // Load history from backend
             console.log('Fetching customization history from backend...');
-            const response = await this.makeAuthenticatedRequest('http://localhost:4003/api/customization-history');
+            const response = await this.makeAuthenticatedRequest('https://ai-jobextension-backend.onrender.com/api/customization-history');
             
             if (response.ok) {
                 const data = await response.json();
@@ -1778,7 +1778,7 @@ class ResumeCustomizer {
             console.log('itemId type:', typeof itemId);
             
             // Get history from backend instead of local storage
-            const response = await this.makeAuthenticatedRequest('http://localhost:4003/api/customization-history');
+            const response = await this.makeAuthenticatedRequest('https://ai-jobextension-backend.onrender.com/api/customization-history');
             if (!response.ok) {
                 throw new Error('Failed to load history from backend');
             }
@@ -1817,7 +1817,7 @@ class ResumeCustomizer {
                 
                 console.log('Making authenticated request for PDF...');
                 // Call backend to generate PDF (authenticated)
-                const response = await this.makeAuthenticatedRequest('http://localhost:4003/api/download/pdf', {
+                const response = await this.makeAuthenticatedRequest('https://ai-jobextension-backend.onrender.com/api/download/pdf', {
                     method: 'POST',
                     body: JSON.stringify({
                         htmlContent: htmlContent,
@@ -1872,7 +1872,7 @@ class ResumeCustomizer {
             } else {
                 // For DOC format, call backend to generate actual Word document
                 console.log('Making authenticated request for DOC...');
-                const response = await this.makeAuthenticatedRequest('http://localhost:4003/api/download/doc', {
+                const response = await this.makeAuthenticatedRequest('https://ai-jobextension-backend.onrender.com/api/download/doc', {
                     method: 'POST',
                     body: JSON.stringify({
                         htmlContent: htmlContent,
@@ -2109,7 +2109,7 @@ class ResumeCustomizer {
             const priceInINR = amount * 10;
             
             // Create Razorpay order
-            const response = await this.makeAuthenticatedRequest('http://localhost:4003/api/payment/create-order', {
+            const response = await this.makeAuthenticatedRequest('https://ai-jobextension-backend.onrender.com/api/payment/create-order', {
                 method: 'POST',
                 body: JSON.stringify({
                     amount: priceInINR,
@@ -2289,7 +2289,7 @@ class ResumeCustomizer {
         try {
             this.showAuthMessage('Creating account...', 'info');
             
-            const response = await fetch('http://localhost:4003/api/auth/signup', {
+            const response = await fetch('https://ai-jobextension-backend.onrender.com/api/auth/signup', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -2324,7 +2324,7 @@ class ResumeCustomizer {
         try {
             this.showAuthMessage('Signing in...', 'info');
 
-            const response = await fetch('http://localhost:4003/api/auth/login', {
+            const response = await fetch('https://ai-jobextension-backend.onrender.com/api/auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -2370,7 +2370,7 @@ class ResumeCustomizer {
         try {
             this.showAuthMessage('Sending reset link...', 'info');
 
-            const response = await fetch('http://localhost:4003/api/auth/forgot-password', {
+            const response = await fetch('https://ai-jobextension-backend.onrender.com/api/auth/forgot-password', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -2493,7 +2493,7 @@ class ResumeCustomizer {
             await this.clearLocalStorageData();
             
             // Load user profile from backend
-            const response = await this.makeAuthenticatedRequest('http://localhost:4003/api/profile');
+            const response = await this.makeAuthenticatedRequest('https://ai-jobextension-backend.onrender.com/api/profile');
             
             if (response.ok) {
                 const data = await response.json();
@@ -2558,7 +2558,7 @@ class ResumeCustomizer {
         }
 
         try {
-            const response = await this.makeAuthenticatedRequest('http://localhost:4003/api/coins/balance');
+            const response = await this.makeAuthenticatedRequest('https://ai-jobextension-backend.onrender.com/api/coins/balance');
             
             if (response.ok) {
                 const data = await response.json();
@@ -2612,7 +2612,7 @@ class ResumeCustomizer {
         }
 
         try {
-            const response = await this.makeAuthenticatedRequest('http://localhost:4003/api/coins/transactions');
+            const response = await this.makeAuthenticatedRequest('https://ai-jobextension-backend.onrender.com/api/coins/transactions');
             
             if (response.ok) {
                 const data = await response.json();
